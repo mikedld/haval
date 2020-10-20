@@ -1,0 +1,195 @@
+dnl  $Id: configure.in,v 1.5 2003/01/20 05:44:48 lteo Exp $
+
+dnl  configure.in:  specifies compile-time configuration options.
+dnl
+dnl  Copyright (c) 2003 Calyptix Security Corporation
+dnl  All rights reserved.
+dnl
+dnl  Redistribution and use in source and binary forms, with or without
+dnl  modification, are permitted provided that the following conditions
+dnl  are met:
+dnl  1. Redistributions of source code must retain the above copyright
+dnl     notice, this list of conditions and the following disclaimer.
+dnl  2. Redistributions in binary form must reproduce the above
+dnl     copyright notice, this list of conditions and the following
+dnl     disclaimer in the documentation and/or other materials provided
+dnl     with the distribution.
+dnl  3. Neither the name of Calyptix Security Corporation nor the
+dnl     names of its contributors may be used to endorse or promote
+dnl     products derived from this software without specific prior
+dnl     written permission.
+dnl
+dnl THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+dnl "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+dnl LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+dnl FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+dnl COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+dnl INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+dnl BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+dnl LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+dnl CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+dnl ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+dnl POSSIBILITY OF SUCH DAMAGE.
+dnl
+dnl -------------------------------------------------------------------
+
+
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(havaltest.c)
+HAVAL_VERSION=`cat VERSION`
+AC_CONFIG_AUX_DIR(config)
+AM_CONFIG_HEADER(config.h:config-h.in)
+AM_INIT_AUTOMAKE("haval", $HAVAL_VERSION)
+#AC_CONFIG_SRCDIR([src/main.cpp])
+#AC_CONFIG_HEADER([config.h])
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+#AM_PROG_LIBTOOL
+
+AC_CANONICAL_HOST
+
+
+
+AC_MSG_CHECKING(for HAVAL number of passes)
+AC_ARG_WITH(num-passes,
+  [  --with-num-passes=NUM  use NUM number of passes (3,4,5) (default=3)],
+  [case "$withval" in
+     3)
+       AC_MSG_RESULT(3)
+       num_passes=3
+       ;;
+     4)
+       AC_MSG_RESULT(4)
+       num_passes=4
+       ;;
+     5)
+       AC_MSG_RESULT(5)
+       num_passes=5
+       ;;
+     *)
+       echo " "
+       echo "ERROR: number of passes MUST be 3, 4, or 5."
+       exit 1
+       ;;
+   esac
+ ],
+ [
+     AC_MSG_RESULT(3)
+     num_passes=3
+ ]
+ )
+AC_SUBST(num_passes)
+AC_DEFINE_UNQUOTED(PASS, $num_passes, [Number of passes])
+
+
+
+
+AC_MSG_CHECKING(for HAVAL fingerprint length)
+AC_ARG_WITH(fpt-len,
+  [  --with-fpt-len=LEN  use LEN fingerprint length (128,160,192,224,256) (default=256)],
+  [case "$withval" in
+     128)
+       AC_MSG_RESULT(128)
+       fpt_len=128
+       ;;
+     160)
+       AC_MSG_RESULT(160)
+       fpt_len=160
+       ;;
+     192)
+       AC_MSG_RESULT(192)
+       fpt_len=192
+       ;;
+     224)
+       AC_MSG_RESULT(224)
+       fpt_len=224
+       ;;
+     256)
+       AC_MSG_RESULT(256)
+       fpt_len=256
+       ;;
+     *)
+       echo " "
+       echo "ERROR: fingerprint length MUST be 128, 160, 192, 224, or 256."
+       exit 1
+       ;;
+   esac
+ ],
+ [
+     AC_MSG_RESULT(256)
+     fpt_len=256
+ ]
+ )
+AC_SUBST(fpt_len)
+AC_DEFINE_UNQUOTED(FPTLEN, $fpt_len, [Length of a fingerprint])
+
+
+AC_MSG_CHECKING(for HAVAL number of test blocks)
+AC_ARG_WITH(test-blocks,
+  [  --with-test-blocks=NUM  use NUM test blocks (default=5000)],
+  [
+     AC_MSG_RESULT($withval)
+     test_blocks=$withval
+  ],
+  [
+     AC_MSG_RESULT(5000)
+     test_blocks=5000
+  ]
+ )
+AC_SUBST(test_blocks)
+AC_DEFINE_UNQUOTED(NUMBER_OF_BLOCKS, $test_blocks, [Number of test blocks])
+
+
+
+
+AC_MSG_CHECKING(for HAVAL test block size)
+AC_ARG_WITH(block-size,
+  [  --with-block-size=NUM  use block size of NUM bytes (default=5000)],
+  [
+     AC_MSG_RESULT($withval)
+     block_size=$withval
+  ],
+  [
+     AC_MSG_RESULT(5000)
+     block_size=5000
+  ]
+ )
+AC_SUBST(block_size)
+AC_DEFINE_UNQUOTED(BLOCK_SIZE, $block_size, [Test block size])
+
+
+
+AC_MSG_CHECKING(whether we should enable extra optimization)
+AC_ARG_ENABLE(extra-optimization,
+  [  --enable-extra-optimization   enable extra optimization (i686 only)],
+  [
+     AC_MSG_RESULT($enableval)
+     CFLAGS="$CFLAGS -O3 -mcpu=i686 -march=i686 -fforce-addr -fomit-frame-pointer -funroll-loops -frerun-cse-after-loop -frerun-loop-opt -malign-functions=4"
+  ],
+  [
+     AC_MSG_RESULT(no)
+  ]
+  )
+
+
+dnl Check endianness
+AC_CALYPTIX_ENDIAN_CHECK
+
+#AC_CONFIG_LINKS(host.h:config/$machine.h
+#                object.h:config/$obj_format.h)
+
+# Checks for libraries.
+
+# Checks for header files.
+# AC_CHECK_HEADERS(getopt.h unistd.h)
+
+# Checks for typedefs, structures, and compiler characteristics.
+
+# Checks for library functions.
+
+AC_DEFINE(PACKAGE_NAME, "HAVAL", [Package name])
+
+AC_OUTPUT(Makefile)

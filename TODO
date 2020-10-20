@@ -1,0 +1,11 @@
+  * Make code compilable with Microsoft Visual C++ (add a MS VC++ 
+    project file), and possibly other Windows compilers.
+
+  * Get rid of compile warnings if possible.
+
+  * Add/update documentation (installation notes, license info, etc.).
+
+  * Add a manpage. 
+
+  * Use getopt() to get command-line options.
+
