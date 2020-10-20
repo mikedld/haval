@@ -1,6 +1,3 @@
-
-/*  $Id: havalapp.h,v 1.3 2003/01/20 05:44:48 lteo Exp $ */
-
 /*
  *  havalapp.h:  specifies the following three constants needed to
  *               compile the HAVAL hashing library:

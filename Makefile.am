@@ -1,5 +1,3 @@
-#  $Id: Makefile.am,v 1.6 2003/01/21 06:18:09 lteo Exp $
-
 #  Copyright (c) 2003 Calyptix Security Corporation
 #  All rights reserved.
 #

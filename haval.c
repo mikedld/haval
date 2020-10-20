@@ -1,6 +1,3 @@
-
-/*  $Id: haval.c,v 1.8 2003/01/20 05:44:48 lteo Exp $ */
-
 /*
  *  haval.c:  specifies the routines in the HAVAL (V.1) hashing library.
  *
@@ -71,8 +68,6 @@
  *
  *  For a list of changes, see the ChangeLog file.
  */
-
-static char rcsid[] = "$Id: haval.c,v 1.8 2003/01/20 05:44:48 lteo Exp $";
 
 #include <stdio.h>
 #include <string.h>

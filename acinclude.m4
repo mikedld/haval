@@ -1,5 +1,3 @@
-dnl  $Id: acinclude.m4,v 1.3 2003/01/20 05:44:48 lteo Exp $
-
 dnl  acinclude.m4:  self-defined m4 macros.
 dnl
 dnl  Copyright (c) 2003 Calyptix Security Corporation

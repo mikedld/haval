@@ -1,6 +1,3 @@
-
-/*  $Id: havaltest.c,v 1.4 2003/01/20 05:44:48 lteo Exp $ */
-
 /*
  *  havaltest.c:  specifies a test program for the HAVAL hashing library.
  *
@@ -58,8 +55,6 @@
  *
  *  For a list of changes, see the ChangeLog file.
  */
-
-static char rcsid[] = "$Id: havaltest.c,v 1.4 2003/01/20 05:44:48 lteo Exp $";
 
 #include <stdio.h>
 #include <time.h>

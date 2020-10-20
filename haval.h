@@ -1,6 +1,3 @@
-
-/*  $Id: haval.h,v 1.2 2003/01/20 05:44:48 lteo Exp $ */
-
 /*
  *  haval.h:  specifies the interface to the HAVAL (V.1) hashing library.
  *
