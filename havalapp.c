@@ -62,7 +62,6 @@
 #include <unistd.h>
 /* #include "havalapp.h" */
 #include "haval.h"
-#include "config.h"
 
 /* #define NUMBER_OF_BLOCKS 5000 */               /* number of test blocks */
 /* #define BLOCK_SIZE       5000 */               /* number of bytes in a block */
