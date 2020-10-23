@@ -9,8 +9,6 @@ jobs:
         build_type: [Debug, RelWithDebInfo]
         arch: [x86, x64]
         cmake: [minimal, latest]
-        haval_pass: ['3', '4', '5']
-        haval_fptlen: ['128', '160', '192', '224', '256']
         exclude:
           - os: linux
             arch: x86
@@ -48,7 +46,7 @@ jobs:
       - name: CMake version
         run: cmake --version
       - name: Configure
-        run: cmake -E make_directory _build && cmake -E chdir _build cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ matrix.cmake_args }} -DHAVAL_PASS=${{ matrix.haval_pass }} -DHAVAL_FPTLEN=${{ matrix.haval_fptlen }}
+        run: cmake -E make_directory _build && cmake -E chdir _build cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ matrix.cmake_args }}
       - name: Build
         run: cmake --build _build --config ${{ matrix.build_type }}
       - name: Test

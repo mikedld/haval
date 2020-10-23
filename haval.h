@@ -66,33 +66,64 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <string>
+#include <iosfwd>
+
+namespace haval
+{
+
+namespace detail
+{
 
 // a HAVAL word = 32 bits
-typedef unsigned int haval_word;
+using word_t = unsigned int;
 
-typedef struct {
+// current version number
+constexpr word_t version = 1;
+
+struct haval_context {
     // number of bits in a message
-    haval_word count[2];
+    word_t count[2];
     // current state of fingerprint
-    haval_word fingerprint[8];
+    word_t fingerprint[8];
     // buffer for a 32-word block
-    haval_word block[32];
+    word_t block[32];
     // unhashed chars (No.<128)
     unsigned char remainder[32 * 4];
-} haval_state;
+};
 
-// hash a string
-void haval_string(const char*, unsigned char*);
-// hash a file
-int haval_file(const char*, unsigned char*);
-// filter -- hash input from stdin
-void haval_stdin();
-// initialization
-void haval_start(haval_state*);
-// updating routine
-void haval_hash(haval_state*, const unsigned char*, size_t);
-// finalization
-void haval_end(haval_state*, unsigned char*);
-// hash a 32-word block
-void haval_hash_block(haval_state*);
+} // namespace detail
+
+template<unsigned int pass_cnt, unsigned int fpt_len>
+class haval
+{
+    static_assert(pass_cnt >= 3, "");
+    static_assert(pass_cnt <= 5, "");
+
+    static_assert(fpt_len >= 128, "");
+    static_assert(fpt_len <= 256, "");
+    static_assert(fpt_len % 32 == 0, "");
+
+public:
+    // initialization
+    void start();
+    // updating routine
+    void update(const void* data, std::size_t data_len);
+    // finalization
+    std::string end();
+
+    // hash a block
+    static std::string from_data(const void* data, std::size_t data_len);
+    // hash a string
+    static std::string from_string(const std::string& data);
+    // hash a stream
+    static std::string from_stream(std::istream& stream);
+
+private:
+    void hash_block();
+
+private:
+    detail::haval_context m_context;
+};
+
+} // namespace haval

@@ -11,11 +11,6 @@ option(HAVAL_ENABLE_TESTS "${PROJECT_NAME}: Enable tests" ${HAVAL_STANDALONE_BUI
 option(HAVAL_ENABLE_WERROR "${PROJECT_NAME}: Treat warnings as errors" ${HAVAL_STANDALONE_BUILD})
 option(HAVAL_BUILD_PROGRAMS "${PROJECT_NAME}: Build programs" ${HAVAL_STANDALONE_BUILD})
 
-set(HAVAL_PASS 3 CACHE STRING "Number of passes")
-set(HAVAL_FPTLEN 256 CACHE STRING "Length of a fingerprint")
-set(HAVAL_NUMBER_OF_BLOCKS 5000 CACHE STRING "Number of test blocks")
-set(HAVAL_BLOCK_SIZE 5000 CACHE STRING "Test block size")
-
 include(TestBigEndian)
 if(HAVAL_ENABLE_INSTALL)
     include(CMakePackageConfigHelpers)
@@ -24,7 +19,7 @@ endif()
 
 if(HAVAL_STANDALONE_BUILD)
     if(NOT CMAKE_CXX_STANDARD)
-        set(CMAKE_CXX_STANDARD 98)
+        set(CMAKE_CXX_STANDARD 11)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
         set(CMAKE_CXX_EXTENSIONS OFF)
     endif()
@@ -45,27 +40,22 @@ endif()
 test_big_endian(HAVAL_BIG_ENDIAN)
 
 add_compile_definitions(
-    PASS=${HAVAL_PASS}
-    FPTLEN=${HAVAL_FPTLEN}
-    NUMBER_OF_BLOCKS=${HAVAL_NUMBER_OF_BLOCKS}
-    BLOCK_SIZE=${HAVAL_BLOCK_SIZE}
-    $<$<NOT:$<BOOL:${HAVAL_BIG_ENDIAN}>>:LITTLE_ENDIAN>
     $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 
-add_library(haval
-    haval.cpp
-    haval.h)
+add_library(haval INTERFACE)
 
 if(NOT HAVAL_STANDALONE_BUILD)
     add_library(${PROJECT_NAME}::haval ALIAS haval)
 endif()
 
 target_include_directories(haval
-    PUBLIC
+    INTERFACE
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-    PRIVATE
-        "${CMAKE_CURRENT_BINARY_DIR}")
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+
+target_compile_definitions(haval
+    INTERFACE
+        $<$<NOT:$<BOOL:${HAVAL_BIG_ENDIAN}>>:HAVAL_LITTLE_ENDIAN>)
 
 if(HAVAL_ENABLE_INSTALL)
     install(
@@ -76,7 +66,9 @@ if(HAVAL_ENABLE_INSTALL)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     install(
-        FILES haval.h
+        FILES
+            haval.h
+            haval.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 

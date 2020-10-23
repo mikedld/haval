@@ -19,6 +19,7 @@ AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
 BinPackParameters: false
 BreakBeforeBraces: Linux
@@ -33,7 +34,7 @@ Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 FixNamespaceComments: true
 IndentWidth: 4
-KeepEmptyLinesAtTheStartOfBlocks: false
+KeepEmptyLinesAtTheStartOfBlocks: true
 MaxEmptyLinesToKeep: 1
 PenaltyReturnTypeOnItsOwnLine: 1000
 PointerAlignment: Left

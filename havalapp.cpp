@@ -54,120 +54,85 @@
 //
 // For a list of changes, see the ChangeLog file.
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "haval.hpp"
 
-#include "haval.h"
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <time.h>
 
 // number of test blocks
 // #define NUMBER_OF_BLOCKS 5000
 // number of bytes in a block
 // #define BLOCK_SIZE 5000
 
-// test the speed of HAVAL
-static void haval_speed();
-// print a fingerprint
-static void haval_print(unsigned char*);
-// test endianity
-static int little_endian();
-// usage
-static void usage();
-
-int main(int argc, char* argv[])
+namespace
 {
-    int i;
-    unsigned char fingerprint[FPTLEN >> 3];
 
-    if (argc <= 1) {
-        // filter
-        haval_stdin();
-    }
-    for (i = 1; i < argc; i++) {
-        if ((argv[i][0] == '?') || (argv[i][0] == '-' && argv[i][1] == '?') || (argv[i][0] == '-' && argv[i][1] == 'h')) {
-            // show help info
-            usage();
-        } else if (argv[i][0] == '-' && argv[i][1] == 'm') {
-            // hash string
-            haval_string(argv[i] + 2, fingerprint);
-            printf("HAVAL(\"%s\") = ", argv[i] + 2);
-            haval_print(fingerprint);
-            printf("\n");
-        } else if (strcmp(argv[i], "-s") == 0) {
-            // test speed
-            haval_speed();
-        } else if (strcmp(argv[i], "-e") == 0) {
-            // test endianity
-            if (little_endian()) {
-                printf("Your machine is little-endian.\n");
-                printf("You may define LITTLE_ENDIAN to speed up processing.\n");
-            } else {
-                printf("Your machine is NOT little-endian.\n");
-                printf("You must NOT define LITTLE_ENDIAN.\n");
-            }
-        } else {
-            // hash file
-            if (haval_file(argv[i], fingerprint)) {
-                printf("%s can not be opened !\n= ", argv[i]);
-            } else {
-                printf("HAVAL(%s) = ", argv[i]);
-                haval_print(fingerprint);
-                printf("\n");
-            }
-        }
-    }
-    return (0);
+unsigned int get_env_uint(const char* key, unsigned int default_value)
+{
+    const char* str_value = std::getenv(key);
+    int int_value = str_value != nullptr ? std::atoi(str_value) : 0;
+    return int_value > 0 ? static_cast<unsigned int>(int_value) : default_value;
 }
 
 // test the speed of HAVAL
-static void haval_speed()
+template<unsigned int pass_cnt, unsigned int fpt_len>
+void haval_speed()
 {
-    haval_state state;
-    unsigned char buff[BLOCK_SIZE];
-    unsigned char fingerprint[FPTLEN >> 3];
+    unsigned int blocks_cnt = get_env_uint("HAVAL_NUMBER_OF_BLOCKS", 5000);
+    unsigned int block_size = get_env_uint("HAVAL_BLOCK_SIZE", 5000);
+
+    haval::haval<pass_cnt, fpt_len> hasher;
+    std::unique_ptr<unsigned char[]> buff(new unsigned char[block_size]);
+    std::string fingerprint;
     clock_t clks;
     double cpu_time;
     unsigned int i;
 
-    printf("Test the speed of HAVAL (PASS = %d, FPTLEN = %d bits).\n", PASS, FPTLEN);
-    printf("Hashing %d %d-byte blocks ...\n", NUMBER_OF_BLOCKS, BLOCK_SIZE);
+    std::printf("Test the speed of HAVAL (PASS = %u, FPTLEN = %u bits).\n", pass_cnt, fpt_len);
+    std::printf("Hashing %d %d-byte blocks ...\n", blocks_cnt, block_size);
 
     // initialize test block
-    for (i = 0; i < BLOCK_SIZE; i++) {
-        buff[i] = (unsigned char)~0;
+    for (i = 0; i < block_size; i++) {
+        buff[i] = static_cast<unsigned char>(~0);
     }
 
     // reset the clock
     clock();
 
     // hash
-    haval_start(&state);
-    for (i = 0; i < NUMBER_OF_BLOCKS; i++) {
-        haval_hash(&state, buff, BLOCK_SIZE);
+    hasher.start();
+    for (i = 0; i < blocks_cnt; i++) {
+        hasher.update(buff.get(), block_size);
     }
-    haval_end(&state, fingerprint);
+    fingerprint = hasher.end();
 
     // get the number of clocks
     clks = clock();
     // get cpu time
-    cpu_time = (double)clks / (double)CLOCKS_PER_SEC;
+    cpu_time = static_cast<double>(clks) / static_cast<double>(CLOCKS_PER_SEC);
 
     if (cpu_time > 0.0) {
-        printf("CPU Time = %3.1f seconds\n", cpu_time);
-        printf("   Speed = %4.2f MBPS (megabits/second)\n", (NUMBER_OF_BLOCKS * BLOCK_SIZE * 8) / (1.0E6 * cpu_time));
+        std::printf("CPU Time = %3.1f seconds\n", cpu_time);
+        std::printf("   Speed = %4.2f MBPS (megabits/second)\n", (blocks_cnt * block_size * 8) / (1.0E6 * cpu_time));
     } else {
-        printf("not enough blocks !\n");
+        std::printf("not enough blocks !\n");
     }
 }
 
 // test endianity
-static int little_endian()
+int little_endian()
 {
-    unsigned long* wp;
+    haval::detail::word_t* wp;
     unsigned char str[4] = {'A', 'B', 'C', 'D'};
 
-    wp = (unsigned long*)str;
-    if (str[0] == (unsigned char)(*wp & 0xFF)) {
+    wp = (haval::detail::word_t*)str;
+    if (str[0] == static_cast<unsigned char>(*wp & 0xFF)) {
         // little endian
         return (1);
     } else {
@@ -177,26 +142,110 @@ static int little_endian()
 }
 
 // print a fingerprint in hexadecimal
-static void haval_print(unsigned char fingerprint[FPTLEN >> 3])
+void haval_print(const std::string& fingerprint)
 {
-    int i;
-
-    for (i = 0; i < (FPTLEN >> 3); i++) {
-        printf("%02X", fingerprint[i]);
+    for (std::size_t i = 0; i < fingerprint.size(); i++) {
+        std::printf("%02X", static_cast<unsigned char>(fingerprint[i]));
     }
 }
 
 // print usage
-static void usage()
+void usage(unsigned int pass_cnt, unsigned int fpt_len)
 {
-    fprintf(stderr, "Usage: haval [OPTION] [FILE]...\n");
-    fprintf(stderr, "  or:  haval -m [STRING]\n");
-    fprintf(stderr, "Generates HAVAL hashes.\n");
-    fprintf(stderr, "With no FILE, read standard input.\n\n");
-    fprintf(stderr, "Compiled to use %d passes and a %d-bit fingerprint length.\n\n", PASS, FPTLEN);
-    fprintf(stderr, "    ?/-?/-h    show help menu\n");
-    fprintf(stderr, "    -e         test endianity\n");
-    fprintf(stderr, "    -m string  hash the given string\n");
-    fprintf(stderr, "    -s         test speed\n");
-    fprintf(stderr, "\nReport bugs to <info@calyptix.com>.\n");
+    std::fprintf(stderr, "Usage: haval [OPTION] [FILE]...\n");
+    std::fprintf(stderr, "  or:  haval -m [STRING]\n");
+    std::fprintf(stderr, "Generates HAVAL hashes.\n");
+    std::fprintf(stderr, "With no FILE, read standard input.\n\n");
+    std::fprintf(stderr, "Configured to use %u passes and a %u-bit fingerprint length.\n\n", pass_cnt, fpt_len);
+    std::fprintf(stderr, "    ?/-?/-h    show help menu\n");
+    std::fprintf(stderr, "    -e         test endianity\n");
+    std::fprintf(stderr, "    -m string  hash the given string\n");
+    std::fprintf(stderr, "    -s         test speed\n");
+    std::fprintf(stderr, "\nReport bugs to <info@calyptix.com>.\n");
+}
+
+template<unsigned int pass_cnt, unsigned int fpt_len>
+int main_impl(int argc, char* argv[])
+{
+    using hash = haval::haval<pass_cnt, fpt_len>;
+
+    int i;
+
+    if (argc <= 1) {
+        // filter
+        haval_print(hash::from_stream(std::cin));
+        std::printf("\n");
+    }
+    for (i = 1; i < argc; i++) {
+        if ((argv[i][0] == '?') || (argv[i][0] == '-' && argv[i][1] == '?') || (argv[i][0] == '-' && argv[i][1] == 'h')) {
+            // show help info
+            usage(pass_cnt, fpt_len);
+        } else if (argv[i][0] == '-' && argv[i][1] == 'm') {
+            // hash string
+            std::printf("HAVAL(\"%s\") = ", argv[i] + 2);
+            haval_print(hash::from_string(argv[i] + 2));
+            std::printf("\n");
+        } else if (std::strcmp(argv[i], "-s") == 0) {
+            // test speed
+            haval_speed<pass_cnt, fpt_len>();
+        } else if (std::strcmp(argv[i], "-e") == 0) {
+            // test endianity
+            if (little_endian()) {
+                std::printf("Your machine is little-endian.\n");
+                std::printf("You may define HAVAL_LITTLE_ENDIAN to speed up processing.\n");
+            } else {
+                std::printf("Your machine is NOT little-endian.\n");
+                std::printf("You must NOT define HAVAL_LITTLE_ENDIAN.\n");
+            }
+        } else {
+            // hash file
+            std::ifstream f(argv[i], std::ios::in | std::ios::binary);
+            if (!f.good()) {
+                std::printf("%s can not be opened !\n= ", argv[i]);
+            } else {
+                std::printf("HAVAL(%s) = ", argv[i]);
+                haval_print(hash::from_stream(f));
+                std::printf("\n");
+            }
+        }
+    }
+    return (0);
+}
+
+template<unsigned int pass_cnt>
+int main_impl(unsigned int fpt_len, int argc, char* argv[])
+{
+    switch (fpt_len) {
+    case 128:
+        return main_impl<pass_cnt, 128>(argc, argv);
+    case 160:
+        return main_impl<pass_cnt, 160>(argc, argv);
+    case 192:
+        return main_impl<pass_cnt, 192>(argc, argv);
+    case 224:
+        return main_impl<pass_cnt, 224>(argc, argv);
+    case 256:
+    default:
+        return main_impl<pass_cnt, 256>(argc, argv);
+    }
+}
+
+int main_impl(unsigned int pass_cnt, unsigned int fpt_len, int argc, char* argv[])
+{
+    switch (pass_cnt) {
+    case 3:
+    default:
+        return main_impl<3>(fpt_len, argc, argv);
+    case 4:
+        return main_impl<4>(fpt_len, argc, argv);
+    case 5:
+        return main_impl<5>(fpt_len, argc, argv);
+    }
+}
+
+} // namespace
+
+int main(int argc, char* argv[])
+{
+    return main_impl(get_env_uint("HAVAL_PASS", 3), get_env_uint("HAVAL_FPTLEN", 256), argc, argv);
 }
