@@ -98,8 +98,7 @@ endif()
 
 if(HAVAL_BUILD_PROGRAMS)
     add_executable(havalapp
-        havalapp.cpp
-        havalapp.h)
+        havalapp.cpp)
 
     if(NOT HAVAL_STANDALONE_BUILD)
         add_executable(${PROJECT_NAME}::havalapp ALIAS havalapp)
