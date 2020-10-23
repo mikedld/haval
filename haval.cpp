@@ -1,6 +1,7 @@
 // haval.cpp:  specifies the routines in the HAVAL (V.1) hashing library.
 //
 // Copyright (c) 2003 Calyptix Security Corporation
+// Copyright (c) 2020 Mike Gelfand
 // All rights reserved.
 //
 // This code is derived from software contributed to Calyptix Security
