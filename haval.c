@@ -71,7 +71,7 @@
 
 #include <stdio.h>
 #include <string.h>
-/* #include "havalapp.h" */
+
 #include "haval.h"
 
 /* current version number */

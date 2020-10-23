@@ -66,7 +66,7 @@
  */
 
 /* a HAVAL word = 32 bits */
-typedef unsigned long int haval_word;
+typedef unsigned int haval_word;
 
 typedef struct {
     /* number of bits in a message */
