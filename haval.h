@@ -63,6 +63,8 @@
 //
 // For a list of changes, see the ChangeLog file.
 
+#pragma once
+
 #include <stddef.h>
 
 // a HAVAL word = 32 bits
