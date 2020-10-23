@@ -45,7 +45,7 @@
  *       Y. Zheng, J. Pieprzyk and J. Seberry:
  *       ``HAVAL --- a one-way hashing algorithm with variable
  *       length of output'', Advances in Cryptology --- AUSCRYPT'92,
- *       Lecture Notes in Computer Science,  Vol.718, pp.83-104, 
+ *       Lecture Notes in Computer Science,  Vol.718, pp.83-104,
  *       Springer-Verlag, 1993.
  *
  *      This library provides routines to hash
@@ -65,22 +65,31 @@
  *  For a list of changes, see the ChangeLog file.
  */
 
-typedef unsigned long int haval_word; /* a HAVAL word = 32 bits */
+/* a HAVAL word = 32 bits */
+typedef unsigned long int haval_word;
 
 typedef struct {
-  haval_word    count[2];                /* number of bits in a message */
-  haval_word    fingerprint[8];          /* current state of fingerprint */    
-  haval_word    block[32];               /* buffer for a 32-word block */ 
-  unsigned char remainder[32*4];         /* unhashed chars (No.<128) */   
+    /* number of bits in a message */
+    haval_word count[2];
+    /* current state of fingerprint */
+    haval_word fingerprint[8];
+    /* buffer for a 32-word block */
+    haval_word block[32];
+    /* unhashed chars (No.<128) */
+    unsigned char remainder[32 * 4];
 } haval_state;
 
-void haval_string (char *, unsigned char *); /* hash a string */
-int  haval_file (char *, unsigned char *);   /* hash a file */
-void haval_stdin (void);                     /* filter -- hash input from stdin */
-void haval_start (haval_state *);            /* initialization */
-void haval_hash (haval_state *, unsigned char *,
-                 unsigned int);              /* updating routine */
-void haval_end (haval_state *, unsigned char *); /* finalization */
-void haval_hash_block (haval_state *);       /* hash a 32-word block */
-
-
+/* hash a string */
+void haval_string(char*, unsigned char*);
+/* hash a file */
+int haval_file(char*, unsigned char*);
+/* filter -- hash input from stdin */
+void haval_stdin(void);
+/* initialization */
+void haval_start(haval_state*);
+/* updating routine */
+void haval_hash(haval_state*, unsigned char*, unsigned int);
+/* finalization */
+void haval_end(haval_state*, unsigned char*);
+/* hash a 32-word block */
+void haval_hash_block(haval_state*);

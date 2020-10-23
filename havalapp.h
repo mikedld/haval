@@ -41,7 +41,7 @@
  *  Descriptions:
  *
  *   LITTLE_ENDIAN  define this only if your machine is little-endian
- *                  (such as 80X86 family). 
+ *                  (such as 80X86 family).
  *
  *         Note:
  *            1. In general, HAVAL is faster on a little endian
@@ -64,14 +64,13 @@
 #undef LITTLE_ENDIAN
 
 #ifndef PASS
-#define PASS       3        /* 3, 4, or 5 */
+/* 3, 4, or 5 */
+#define PASS 3
 #endif
 
-
-#ifndef FPTLEN  
-#define FPTLEN     256      /* 128, 160, 192, 224 or 256 */
+#ifndef FPTLEN
+/* 128, 160, 192, 224 or 256 */
+#define FPTLEN 256
 #endif
 
 #endif /* THIS_IS_JUST_A_DUMMY_DIRECTIVE */
-
-
