@@ -7,6 +7,7 @@ if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 endif()
 
 option(HAVAL_ENABLE_INSTALL "${PROJECT_NAME}: Enable install" ${HAVAL_STANDALONE_BUILD})
+option(HAVAL_ENABLE_TESTS "${PROJECT_NAME}: Enable tests" ${HAVAL_STANDALONE_BUILD})
 option(HAVAL_BUILD_PROGRAMS "${PROJECT_NAME}: Build programs" ${HAVAL_STANDALONE_BUILD})
 
 set(HAVAL_PASS 3 CACHE STRING "Number of passes")
@@ -73,6 +74,22 @@ if(HAVAL_ENABLE_INSTALL)
     install(
         FILES haval.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
+
+if(HAVAL_ENABLE_TESTS)
+    enable_testing()
+
+    add_executable(havaltest
+        havaltest.c)
+
+    target_link_libraries(havaltest
+        PRIVATE
+            haval)
+
+    add_test(
+        NAME havaltest
+        COMMAND havaltest
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 if(HAVAL_BUILD_PROGRAMS)

@@ -40,7 +40,6 @@
  *
  *      (none)    - hash input from stdin
  *      ?,-?,-h   - show help menu
- *      -c        - hash certification data
  *      -e        - test whether your machine is little-endian
  *      -mstring  - hash message (string of chars)
  *      -s        - test speed
@@ -70,8 +69,6 @@
 
 /* test the speed of HAVAL */
 static void haval_speed(void);
-/* hash test data set */
-static void haval_cert(void);
 /* print a fingerprint */
 static void haval_print(unsigned char*);
 /* test endianity */
@@ -98,9 +95,6 @@ int main(int argc, char* argv[])
             printf("HAVAL(\"%s\") = ", argv[i] + 2);
             haval_print(fingerprint);
             printf("\n");
-        } else if (strcmp(argv[i], "-c") == 0) {
-            /* hash test set */
-            haval_cert();
         } else if (strcmp(argv[i], "-s") == 0) {
             /* test speed */
             haval_speed();
@@ -168,62 +162,6 @@ static void haval_speed(void)
     }
 }
 
-/* hash a set of certification data and print the results.  */
-static void haval_cert(void)
-{
-    char* str;
-    unsigned char fingerprint[FPTLEN >> 3];
-
-    printf("\n");
-    printf("HAVAL certification data (PASS=%d, FPTLEN=%d):", PASS, FPTLEN);
-    printf("\n");
-
-    str = "";
-    haval_string(str, fingerprint);
-    printf("HAVAL(\"%s\") = ", str);
-    haval_print(fingerprint);
-    printf("\n");
-
-    str = "a";
-    haval_string(str, fingerprint);
-    printf("HAVAL(\"%s\") = ", str);
-    haval_print(fingerprint);
-    printf("\n");
-
-    str = "HAVAL";
-    haval_string(str, fingerprint);
-    printf("HAVAL(\"%s\") = ", str);
-    haval_print(fingerprint);
-    printf("\n");
-
-    str = "0123456789";
-    haval_string(str, fingerprint);
-    printf("HAVAL(\"%s\") = ", str);
-    haval_print(fingerprint);
-    printf("\n");
-
-    str = "abcdefghijklmnopqrstuvwxyz";
-    haval_string(str, fingerprint);
-    printf("HAVAL(\"%s\") = ", str);
-    haval_print(fingerprint);
-    printf("\n");
-
-    str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    haval_string(str, fingerprint);
-    printf("HAVAL(\"%s\")\n      = ", str);
-    haval_print(fingerprint);
-    printf("\n");
-
-    str = "pi.frac";
-    if (haval_file(str, fingerprint)) {
-        printf("%s cannot be opened! Skipping test...\n", str);
-    } else {
-        printf("HAVAL(%s) = ", str);
-        haval_print(fingerprint);
-        printf("\n");
-    }
-}
-
 /* test endianity */
 static int little_endian(void)
 {
@@ -259,7 +197,6 @@ static void usage(void)
     fprintf(stderr, "With no FILE, read standard input.\n\n");
     fprintf(stderr, "Compiled to use %d passes and a %d-bit fingerprint length.\n\n", PASS, FPTLEN);
     fprintf(stderr, "    ?/-?/-h    show help menu\n");
-    fprintf(stderr, "    -c         hash certification data\n");
     fprintf(stderr, "    -e         test endianity\n");
     fprintf(stderr, "    -m string  hash the given string\n");
     fprintf(stderr, "    -s         test speed\n");
