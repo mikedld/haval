@@ -135,7 +135,7 @@ static void haval_speed(void)
 
     /* initialize test block */
     for (i = 0; i < BLOCK_SIZE; i++) {
-        buff[i] = ~0;
+        buff[i] = (unsigned char)~0;
     }
 
     /* reset the clock */

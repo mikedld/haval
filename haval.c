@@ -86,7 +86,7 @@ void haval_stdin(void);
 /* initialization */
 void haval_start(haval_state*);
 /* updating routine */
-void haval_hash(haval_state*, unsigned char*, unsigned int);
+void haval_hash(haval_state*, unsigned char*, size_t);
 /* finalization */
 void haval_end(haval_state*, unsigned char*);
 /* hash a 32-word block */
@@ -106,17 +106,19 @@ static unsigned char padding[128] = {
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-#define f_1(x6, x5, x4, x3, x2, x1, x0) ((x1) & ((x0) ^ (x4)) ^ (x2) & (x5) ^ (x3) & (x6) ^ (x0))
+#define f_1(x6, x5, x4, x3, x2, x1, x0) (((x1) & ((x0) ^ (x4))) ^ ((x2) & (x5)) ^ ((x3) & (x6)) ^ (x0))
 
 #define f_2(x6, x5, x4, x3, x2, x1, x0) \
-    ((x2) & ((x1) & ~(x3) ^ (x4) & (x5) ^ (x6) ^ (x0)) ^ (x4) & ((x1) ^ (x5)) ^ (x3) & (x5) ^ (x0))
+    (((x2) & (((x1) & ~(x3)) ^ ((x4) & (x5)) ^ (x6) ^ (x0))) ^ ((x4) & ((x1) ^ (x5))) ^ ((x3) & (x5)) ^ (x0))
 
-#define f_3(x6, x5, x4, x3, x2, x1, x0) ((x3) & ((x1) & (x2) ^ (x6) ^ (x0)) ^ (x1) & (x4) ^ (x2) & (x5) ^ (x0))
+#define f_3(x6, x5, x4, x3, x2, x1, x0) (((x3) & (((x1) & (x2)) ^ (x6) ^ (x0))) ^ ((x1) & (x4)) ^ ((x2) & (x5)) ^ (x0))
 
 #define f_4(x6, x5, x4, x3, x2, x1, x0) \
-    ((x4) & ((x5) & ~(x2) ^ (x3) & ~(x6) ^ (x1) ^ (x6) ^ (x0)) ^ (x3) & ((x1) & (x2) ^ (x5) ^ (x6)) ^ (x2) & (x6) ^ (x0))
+    (((x4) & (((x5) & ~(x2)) ^ ((x3) & ~(x6)) ^ (x1) ^ (x6) ^ (x0))) ^ ((x3) & (((x1) & (x2)) ^ (x5) ^ (x6))) ^ \
+     ((x2) & (x6)) ^ (x0))
 
-#define f_5(x6, x5, x4, x3, x2, x1, x0) ((x0) & ((x1) & (x2) & (x3) ^ ~(x5)) ^ (x1) & (x4) ^ (x2) & (x5) ^ (x3) & (x6))
+#define f_5(x6, x5, x4, x3, x2, x1, x0) \
+    (((x0) & (((x1) & (x2) & (x3)) ^ ~(x5))) ^ ((x1) & (x4)) ^ ((x2) & (x5)) ^ ((x3) & (x6)))
 
 /*
  * Permutations phi_{i,j}, i=3,4,5, j=1,...,i.
@@ -243,7 +245,7 @@ static unsigned char padding[128] = {
 void haval_string(char* string, unsigned char* fingerprint)
 {
     haval_state state;
-    unsigned int len = strlen(string);
+    size_t len = strlen(string);
 
     haval_start(&state);
     haval_hash(&state, (unsigned char*)string, len);
@@ -255,15 +257,20 @@ int haval_file(char* file_name, unsigned char* fingerprint)
 {
     FILE* file;
     haval_state state;
-    int len;
+    size_t len;
     unsigned char buffer[1024];
 
-    if ((file = fopen(file_name, "rb")) == NULL) {
+    file = fopen(file_name, "rb");
+    if (file == NULL) {
         /* fail */
         return (1);
     } else {
         haval_start(&state);
-        while ((len = fread(buffer, 1, 1024, file))) {
+        for (;;) {
+            len = fread(buffer, 1, 1024, file);
+            if (len == 0) {
+                break;
+            }
             haval_hash(&state, buffer, len);
         }
         fclose(file);
@@ -277,18 +284,20 @@ int haval_file(char* file_name, unsigned char* fingerprint)
 void haval_stdin(void)
 {
     haval_state state;
-    int i, len;
+    size_t i, len;
     unsigned char buffer[32], fingerprint[FPTLEN >> 3];
 
     haval_start(&state);
-    /* while (len = fread (buffer, 1, 32, stdin)) { */
-    while ((len = fread(buffer, 1, 32, stdin))) {
+    for (;;) {
+        len = fread(buffer, 1, 32, stdin);
+        if (len == 0) {
+            break;
+        }
         haval_hash(&state, buffer, len);
     }
     haval_end(&state, fingerprint);
 
     for (i = 0; i < (FPTLEN >> 3); i++) {
-        /* putchar(fingerprint[i]); */
         printf("%02X", fingerprint[i]);
     }
     printf("\n");
@@ -314,16 +323,17 @@ void haval_start(haval_state* state)
  * hash a string of specified length.
  * to be used in conjunction with haval_start and haval_end.
  */
-void haval_hash(haval_state* state, unsigned char* str, unsigned int str_len)
+void haval_hash(haval_state* state, unsigned char* str, size_t str_len)
 {
-    unsigned int i, rmd_len, fill_len;
+    size_t i, rmd_len, fill_len;
 
     /* calculate the number of bytes in the remainder */
-    rmd_len = (unsigned int)((state->count[0] >> 3) & 0x7F);
+    rmd_len = (state->count[0] >> 3) & 0x7F;
     fill_len = 128 - rmd_len;
 
     /* update the number of bits */
-    if ((state->count[0] += (haval_word)str_len << 3) < ((haval_word)str_len << 3)) {
+    state->count[0] += (haval_word)str_len << 3;
+    if (state->count[0] < (str_len << 3)) {
         state->count[1]++;
     }
     state->count[1] += (haval_word)str_len >> 29;
@@ -370,7 +380,7 @@ void haval_hash(haval_state* state, unsigned char* str, unsigned int str_len)
 void haval_end(haval_state* state, unsigned char* final_fpt)
 {
     unsigned char tail[10];
-    unsigned int rmd_len, pad_len;
+    size_t rmd_len, pad_len;
 
     /*
      * save the version number, the number of passes, the fingerprint
@@ -381,7 +391,7 @@ void haval_end(haval_state* state, unsigned char* final_fpt)
     uint2ch(state->count, &tail[2], 2);
 
     /* pad out to 118 mod 128 */
-    rmd_len = (unsigned int)((state->count[0] >> 3) & 0x7f);
+    rmd_len = (state->count[0] >> 3) & 0x7f;
     pad_len = (rmd_len < 118) ? (118 - rmd_len) : (246 - rmd_len);
     haval_hash(state, padding, pad_len);
 
@@ -612,6 +622,9 @@ void haval_hash_block(haval_state* state)
 static void haval_tailor(haval_state* state)
 {
     haval_word temp;
+
+    (void)state;
+    (void)temp;
 
 #if FPTLEN == 128
     temp = (state->fingerprint[7] & 0x000000FFL) | (state->fingerprint[6] & 0xFF000000L) |

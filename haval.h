@@ -65,6 +65,8 @@
  *  For a list of changes, see the ChangeLog file.
  */
 
+#include <stddef.h>
+
 /* a HAVAL word = 32 bits */
 typedef unsigned int haval_word;
 
@@ -88,7 +90,7 @@ void haval_stdin(void);
 /* initialization */
 void haval_start(haval_state*);
 /* updating routine */
-void haval_hash(haval_state*, unsigned char*, unsigned int);
+void haval_hash(haval_state*, unsigned char*, size_t);
 /* finalization */
 void haval_end(haval_state*, unsigned char*);
 /* hash a 32-word block */

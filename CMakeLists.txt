@@ -8,6 +8,7 @@ endif()
 
 option(HAVAL_ENABLE_INSTALL "${PROJECT_NAME}: Enable install" ${HAVAL_STANDALONE_BUILD})
 option(HAVAL_ENABLE_TESTS "${PROJECT_NAME}: Enable tests" ${HAVAL_STANDALONE_BUILD})
+option(HAVAL_ENABLE_WERROR "${PROJECT_NAME}: Treat warnings as errors" ${HAVAL_STANDALONE_BUILD})
 option(HAVAL_BUILD_PROGRAMS "${PROJECT_NAME}: Build programs" ${HAVAL_STANDALONE_BUILD})
 
 set(HAVAL_PASS 3 CACHE STRING "Number of passes")
@@ -32,10 +33,12 @@ if(HAVAL_STANDALONE_BUILD)
         add_compile_options(
             -Wall
             -Wextra
-            -pedantic)
+            -pedantic
+            $<$<BOOL:${HAVAL_ENABLE_WERROR}>:-Werror>)
     elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(
-            /W4)
+            /W4
+            $<$<BOOL:${HAVAL_ENABLE_WERROR}>:/WX>)
     endif()
 endif()
 
@@ -46,7 +49,8 @@ add_compile_definitions(
     FPTLEN=${HAVAL_FPTLEN}
     NUMBER_OF_BLOCKS=${HAVAL_NUMBER_OF_BLOCKS}
     BLOCK_SIZE=${HAVAL_BLOCK_SIZE}
-    $<$<NOT:$<BOOL:${HAVAL_BIG_ENDIAN}>>:LITTLE_ENDIAN>)
+    $<$<NOT:$<BOOL:${HAVAL_BIG_ENDIAN}>>:LITTLE_ENDIAN>
+    $<$<C_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 
 add_library(haval
     haval.c
