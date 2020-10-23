@@ -1,109 +1,106 @@
-/*
- *  haval.cpp:  specifies the routines in the HAVAL (V.1) hashing library.
- *
- *  Copyright (c) 2003 Calyptix Security Corporation
- *  All rights reserved.
- *
- *  This code is derived from software contributed to Calyptix Security
- *  Corporation by Yuliang Zheng.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *  1. Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *  3. Neither the name of Calyptix Security Corporation nor the
- *     names of its contributors may be used to endorse or promote
- *     products derived from this software without specific prior
- *     written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- * -------------------------------------------------------------------
- *
- *      HAVAL is a one-way hashing algorithm with the following
- *      collision-resistant property:
- *             It is computationally infeasible to find two or more
- *             messages that are hashed into the same fingerprint.
- *
- *  Reference:
- *       Y. Zheng, J. Pieprzyk and J. Seberry:
- *       ``HAVAL --- a one-way hashing algorithm with variable
- *       length of output'', Advances in Cryptology --- AUSCRYPT'92,
- *       Lecture Notes in Computer Science,  Vol.718, pp.83-104,
- *       Springer-Verlag, 1993.
- *
- *  Descriptions:
- *      -  haval_string:      hash a string
- *      -  haval_file:        hash a file
- *      -  haval_stdin:       filter -- hash input from the stdin device
- *      -  haval_hash:        hash a string of specified length
- *                            (Haval_hash is used in conjunction with
- *                             haval_start & haval_end.)
- *      -  haval_hash_block:  hash a 32-word block
- *      -  haval_start:       initialization
- *      -  haval_end:         finalization
- *
- *  Authors:    Yuliang Zheng and Lawrence Teo
- *              Calyptix Security Corporation
- *              P.O. Box 561508, Charlotte, NC 28213, USA
- *              Email: info@calyptix.com
- *              URL:   http://www.calyptix.com/
- *              Voice: +1 704 806 8635
- *
- *  For a list of changes, see the ChangeLog file.
- */
+// haval.cpp:  specifies the routines in the HAVAL (V.1) hashing library.
+//
+// Copyright (c) 2003 Calyptix Security Corporation
+// All rights reserved.
+//
+// This code is derived from software contributed to Calyptix Security
+// Corporation by Yuliang Zheng.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above
+//    copyright notice, this list of conditions and the following
+//    disclaimer in the documentation and/or other materials provided
+//    with the distribution.
+// 3. Neither the name of Calyptix Security Corporation nor the
+//    names of its contributors may be used to endorse or promote
+//    products derived from this software without specific prior
+//    written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+// -------------------------------------------------------------------
+//
+//     HAVAL is a one-way hashing algorithm with the following
+//     collision-resistant property:
+//            It is computationally infeasible to find two or more
+//            messages that are hashed into the same fingerprint.
+//
+// Reference:
+//      Y. Zheng, J. Pieprzyk and J. Seberry:
+//      ``HAVAL --- a one-way hashing algorithm with variable
+//      length of output'', Advances in Cryptology --- AUSCRYPT'92,
+//      Lecture Notes in Computer Science,  Vol.718, pp.83-104,
+//      Springer-Verlag, 1993.
+//
+// Descriptions:
+//     -  haval_string:      hash a string
+//     -  haval_file:        hash a file
+//     -  haval_stdin:       filter -- hash input from the stdin device
+//     -  haval_hash:        hash a string of specified length
+//                           (Haval_hash is used in conjunction with
+//                            haval_start & haval_end.)
+//     -  haval_hash_block:  hash a 32-word block
+//     -  haval_start:       initialization
+//     -  haval_end:         finalization
+//
+// Authors:    Yuliang Zheng and Lawrence Teo
+//             Calyptix Security Corporation
+//             P.O. Box 561508, Charlotte, NC 28213, USA
+//             Email: info@calyptix.com
+//             URL:   http://www.calyptix.com/
+//             Voice: +1 704 806 8635
+//
+// For a list of changes, see the ChangeLog file.
 
 #include <stdio.h>
 #include <string.h>
 
 #include "haval.h"
 
-/* current version number */
+// current version number
 #define HAVAL_VERSION 1
 
-/* hash a string */
+// hash a string
 void haval_string(const char*, unsigned char*);
-/* hash a file */
+// hash a file
 int haval_file(const char*, unsigned char*);
-/* hash input from stdin */
+// hash input from stdin
 void haval_stdin();
-/* initialization */
+// initialization
 void haval_start(haval_state*);
-/* updating routine */
+// updating routine
 void haval_hash(haval_state*, const unsigned char*, size_t);
-/* finalization */
+// finalization
 void haval_end(haval_state*, unsigned char*);
-/* hash a 32-word block */
+// hash a 32-word block
 void haval_hash_block(haval_state*);
-/* folding the last output */
+// folding the last output
 static void haval_tailor(haval_state*);
 
-/* constants for padding */
-static unsigned char padding[128] = {
-        /**/
-        0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
-        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /**/
+// constants for padding
+static unsigned char padding[128] = { //
+        0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+        0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 #define f_1(x6, x5, x4, x3, x2, x1, x0) (((x1) & ((x0) ^ (x4))) ^ ((x2) & (x5)) ^ ((x3) & (x6)) ^ (x0))
@@ -120,33 +117,33 @@ static unsigned char padding[128] = {
 #define f_5(x6, x5, x4, x3, x2, x1, x0) \
     (((x0) & (((x1) & (x2) & (x3)) ^ ~(x5))) ^ ((x1) & (x4)) ^ ((x2) & (x5)) ^ ((x3) & (x6)))
 
-/*
- * Permutations phi_{i,j}, i=3,4,5, j=1,...,i.
- *
- * PASS = 3:
- *               6 5 4 3 2 1 0
- *               | | | | | | | (replaced by)
- *  phi_{3,1}:   1 0 3 5 6 2 4
- *  phi_{3,2}:   4 2 1 0 5 3 6
- *  phi_{3,3}:   6 1 2 3 4 5 0
- *
- * PASS = 4:
- *               6 5 4 3 2 1 0
- *               | | | | | | | (replaced by)
- *  phi_{4,1}:   2 6 1 4 5 3 0
- *  phi_{4,2}:   3 5 2 0 1 6 4
- *  phi_{4,3}:   1 4 3 6 0 2 5
- *  phi_{4,4}:   6 4 0 5 2 1 3
- *
- * PASS = 5:
- *               6 5 4 3 2 1 0
- *               | | | | | | | (replaced by)
- *  phi_{5,1}:   3 4 1 0 5 2 6
- *  phi_{5,2}:   6 2 1 0 3 4 5
- *  phi_{5,3}:   2 6 0 4 3 1 5
- *  phi_{5,4}:   1 5 3 2 0 4 6
- *  phi_{5,5}:   2 5 0 6 4 3 1
- */
+//
+// Permutations phi_{i,j}, i=3,4,5, j=1,...,i.
+//
+// PASS = 3:
+//               6 5 4 3 2 1 0
+//               | | | | | | | (replaced by)
+//  phi_{3,1}:   1 0 3 5 6 2 4
+//  phi_{3,2}:   4 2 1 0 5 3 6
+//  phi_{3,3}:   6 1 2 3 4 5 0
+//
+// PASS = 4:
+//               6 5 4 3 2 1 0
+//               | | | | | | | (replaced by)
+//  phi_{4,1}:   2 6 1 4 5 3 0
+//  phi_{4,2}:   3 5 2 0 1 6 4
+//  phi_{4,3}:   1 4 3 6 0 2 5
+//  phi_{4,4}:   6 4 0 5 2 1 3
+//
+// PASS = 5:
+//               6 5 4 3 2 1 0
+//               | | | | | | | (replaced by)
+//  phi_{5,1}:   3 4 1 0 5 2 6
+//  phi_{5,2}:   6 2 1 0 3 4 5
+//  phi_{5,3}:   2 6 0 4 3 1 5
+//  phi_{5,4}:   1 5 3 2 0 4 6
+//  phi_{5,5}:   2 5 0 6 4 3 1
+//
 
 #if PASS == 3
 #define Fphi_1(x6, x5, x4, x3, x2, x1, x0) f_1(x1, x0, x3, x5, x6, x2, x4)
@@ -212,10 +209,8 @@ static unsigned char padding[128] = {
         (x7) = rotate_right(temp, 7) + rotate_right((x7), 11) + (w) + (c); \
     }
 
-/*
- * translate every four characters into a word.
- * assume the number of characters is a multiple of four.
- */
+// translate every four characters into a word.
+// assume the number of characters is a multiple of four.
 #define ch2uint(string, word, slen) \
     { \
         unsigned char* sp = string; \
@@ -227,7 +222,7 @@ static unsigned char padding[128] = {
         } \
     }
 
-/* translate each word into four characters */
+// translate each word into four characters
 #define uint2ch(word, string, wlen) \
     { \
         haval_word* wp = word; \
@@ -241,7 +236,7 @@ static unsigned char padding[128] = {
         } \
     }
 
-/* hash a string */
+// hash a string
 void haval_string(const char* string, unsigned char* fingerprint)
 {
     haval_state state;
@@ -252,7 +247,7 @@ void haval_string(const char* string, unsigned char* fingerprint)
     haval_end(&state, fingerprint);
 }
 
-/* hash a file */
+// hash a file
 int haval_file(const char* file_name, unsigned char* fingerprint)
 {
     FILE* file;
@@ -262,7 +257,7 @@ int haval_file(const char* file_name, unsigned char* fingerprint)
 
     file = fopen(file_name, "rb");
     if (file == NULL) {
-        /* fail */
+        // fail
         return (1);
     } else {
         haval_start(&state);
@@ -275,12 +270,12 @@ int haval_file(const char* file_name, unsigned char* fingerprint)
         }
         fclose(file);
         haval_end(&state, fingerprint);
-        /* success */
+        // success
         return (0);
     }
 }
 
-/* hash input from stdin */
+// hash input from stdin
 void haval_stdin()
 {
     haval_state state;
@@ -303,12 +298,12 @@ void haval_stdin()
     printf("\n");
 }
 
-/* initialization */
+// initialization
 void haval_start(haval_state* state)
 {
-    /* clear count */
+    // clear count
     state->count[0] = state->count[1] = 0;
-    /* initial fingerprint */
+    // initial fingerprint
     state->fingerprint[0] = 0x243F6A88L;
     state->fingerprint[1] = 0x85A308D3L;
     state->fingerprint[2] = 0x13198A2EL;
@@ -319,19 +314,17 @@ void haval_start(haval_state* state)
     state->fingerprint[7] = 0xEC4E6C89L;
 }
 
-/*
- * hash a string of specified length.
- * to be used in conjunction with haval_start and haval_end.
- */
+// hash a string of specified length.
+// to be used in conjunction with haval_start and haval_end.
 void haval_hash(haval_state* state, const unsigned char* str, size_t str_len)
 {
     size_t i, rmd_len, fill_len;
 
-    /* calculate the number of bytes in the remainder */
+    // calculate the number of bytes in the remainder
     rmd_len = (state->count[0] >> 3) & 0x7F;
     fill_len = 128 - rmd_len;
 
-    /* update the number of bits */
+    // update the number of bits
     state->count[0] += (haval_word)str_len << 3;
     if (state->count[0] < (str_len << 3)) {
         state->count[1]++;
@@ -340,7 +333,7 @@ void haval_hash(haval_state* state, const unsigned char* str, size_t str_len)
 
 #ifdef LITTLE_ENDIAN
 
-    /* hash as many blocks as possible */
+    // hash as many blocks as possible
     if (rmd_len + str_len >= 128) {
         memcpy(((unsigned char*)state->block) + rmd_len, str, fill_len);
         haval_hash_block(state);
@@ -356,7 +349,7 @@ void haval_hash(haval_state* state, const unsigned char* str, size_t str_len)
 
 #else
 
-    /* hash as many blocks as possible */
+    // hash as many blocks as possible
     if (rmd_len + str_len >= 128) {
         memcpy(&state->remainder[rmd_len], str, fill_len);
         ch2uint(state->remainder, state->block, 128);
@@ -370,56 +363,52 @@ void haval_hash(haval_state* state, const unsigned char* str, size_t str_len)
     } else {
         i = 0;
     }
-    /* save the remaining input chars */
+    // save the remaining input chars
     memcpy(&state->remainder[rmd_len], str + i, str_len - i);
 
 #endif
 }
 
-/* finalization */
+// finalization
 void haval_end(haval_state* state, unsigned char* final_fpt)
 {
     unsigned char tail[10];
     size_t rmd_len, pad_len;
 
-    /*
-     * save the version number, the number of passes, the fingerprint
-     * length and the number of bits in the unpadded message.
-     */
+    // save the version number, the number of passes, the fingerprint
+    // length and the number of bits in the unpadded message.
     tail[0] = (unsigned char)(((FPTLEN & 0x3) << 6) | ((PASS & 0x7) << 3) | (HAVAL_VERSION & 0x7));
     tail[1] = (unsigned char)((FPTLEN >> 2) & 0xFF);
     uint2ch(state->count, &tail[2], 2);
 
-    /* pad out to 118 mod 128 */
+    // pad out to 118 mod 128
     rmd_len = (state->count[0] >> 3) & 0x7f;
     pad_len = (rmd_len < 118) ? (118 - rmd_len) : (246 - rmd_len);
     haval_hash(state, padding, pad_len);
 
-    /*
-     * append the version number, the number of passes,
-     * the fingerprint length and the number of bits
-     */
+    // append the version number, the number of passes,
+    // the fingerprint length and the number of bits
     haval_hash(state, tail, 10);
 
-    /* tailor the last output */
+    // tailor the last output
     haval_tailor(state);
 
-    /* translate and save the final fingerprint */
+    // translate and save the final fingerprint
     uint2ch(state->fingerprint, final_fpt, FPTLEN >> 5);
 
-    /* clear the state information */
+    // clear the state information
     memset((unsigned char*)state, 0, sizeof(*state));
 }
 
-/* hash a 32-word block */
+// hash a 32-word block
 void haval_hash_block(haval_state* state)
 {
-    /* make use of internal registers */
+    // make use of internal registers
     register haval_word t0 = state->fingerprint[0], t1 = state->fingerprint[1], t2 = state->fingerprint[2],
                         t3 = state->fingerprint[3], t4 = state->fingerprint[4], t5 = state->fingerprint[5],
                         t6 = state->fingerprint[6], t7 = state->fingerprint[7], *w = state->block;
 
-    /* Pass 1 */
+    // Pass 1
     FF_1(t7, t6, t5, t4, t3, t2, t1, t0, *(w));
     FF_1(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 1));
     FF_1(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 2));
@@ -456,7 +445,7 @@ void haval_hash_block(haval_state* state)
     FF_1(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 30));
     FF_1(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 31));
 
-    /* Pass 2 */
+    // Pass 2
     FF_2(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 5), 0x452821E6L);
     FF_2(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 14), 0x38D01377L);
     FF_2(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 26), 0xBE5466CFL);
@@ -493,7 +482,7 @@ void haval_hash_block(haval_state* state)
     FF_2(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 31), 0x7B54A41DL);
     FF_2(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 27), 0xC25A59B5L);
 
-    /* Pass 3 */
+    // Pass 3
     FF_3(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 19), 0x9C30D539L);
     FF_3(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 9), 0x2AF26013L);
     FF_3(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 4), 0xC5D1B023L);
@@ -531,7 +520,7 @@ void haval_hash_block(haval_state* state)
     FF_3(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 2), 0x6C24CF5CL);
 
 #if PASS >= 4
-    /* Pass 4. executed only when PASS =4 or 5 */
+    // Pass 4. executed only when PASS =4 or 5
     FF_4(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 24), 0x7A325381L);
     FF_4(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 4), 0x28958677L);
     FF_4(t5, t4, t3, t2, t1, t0, t7, t6, *(w), 0x3B8F4898L);
@@ -570,7 +559,7 @@ void haval_hash_block(haval_state* state)
 #endif
 
 #if PASS == 5
-    /* Pass 5. executed only when PASS = 5 */
+    // Pass 5. executed only when PASS = 5
     FF_5(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 27), 0xBA3BF050L);
     FF_5(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 3), 0x7EFB2A98L);
     FF_5(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 21), 0xA1F1651DL);
@@ -618,7 +607,7 @@ void haval_hash_block(haval_state* state)
     state->fingerprint[7] += t7;
 }
 
-/* tailor the last output */
+// tailor the last output
 static void haval_tailor(haval_state* state)
 {
     haval_word temp;

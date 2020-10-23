@@ -182,7 +182,7 @@ static void verify_result(const char* data, const unsigned char* got, const char
     printf("\n");
 }
 
-/* hash a set of certification data and print the results.  */
+// hash a set of certification data and print the results.
 int main()
 {
     const char* str;
