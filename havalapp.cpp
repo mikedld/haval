@@ -1,5 +1,5 @@
 /*
- *  havaltest.c:  specifies a test program for the HAVAL hashing library.
+ *  havaltest.cpp:  specifies a test program for the HAVAL hashing library.
  *
  *  Copyright (c) 2003 Calyptix Security Corporation
  *  All rights reserved.
@@ -67,13 +67,13 @@
 /* #define BLOCK_SIZE 5000 */
 
 /* test the speed of HAVAL */
-static void haval_speed(void);
+static void haval_speed();
 /* print a fingerprint */
 static void haval_print(unsigned char*);
 /* test endianity */
-static int little_endian(void);
+static int little_endian();
 /* usage */
-static void usage(void);
+static void usage();
 
 int main(int argc, char* argv[])
 {
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 }
 
 /* test the speed of HAVAL */
-static void haval_speed(void)
+static void haval_speed()
 {
     haval_state state;
     unsigned char buff[BLOCK_SIZE];
@@ -162,7 +162,7 @@ static void haval_speed(void)
 }
 
 /* test endianity */
-static int little_endian(void)
+static int little_endian()
 {
     unsigned long* wp;
     unsigned char str[4] = {'A', 'B', 'C', 'D'};
@@ -188,7 +188,7 @@ static void haval_print(unsigned char fingerprint[FPTLEN >> 3])
 }
 
 /* print usage */
-static void usage(void)
+static void usage()
 {
     fprintf(stderr, "Usage: haval [OPTION] [FILE]...\n");
     fprintf(stderr, "  or:  haval -m [STRING]\n");

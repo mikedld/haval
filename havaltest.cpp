@@ -185,7 +185,7 @@ static void verify_result(const char* data, const unsigned char* got, const char
 /* hash a set of certification data and print the results.  */
 int main()
 {
-    char* str;
+    const char* str;
     unsigned char fingerprint[FPTLEN >> 3];
 
     printf("HAVAL certification data (PASS=%d, FPTLEN=%d):\n", PASS, FPTLEN);

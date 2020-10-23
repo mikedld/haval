@@ -1,5 +1,5 @@
 /*
- *  haval.c:  specifies the routines in the HAVAL (V.1) hashing library.
+ *  haval.cpp:  specifies the routines in the HAVAL (V.1) hashing library.
  *
  *  Copyright (c) 2003 Calyptix Security Corporation
  *  All rights reserved.
@@ -78,15 +78,15 @@
 #define HAVAL_VERSION 1
 
 /* hash a string */
-void haval_string(char*, unsigned char*);
+void haval_string(const char*, unsigned char*);
 /* hash a file */
-int haval_file(char*, unsigned char*);
+int haval_file(const char*, unsigned char*);
 /* hash input from stdin */
-void haval_stdin(void);
+void haval_stdin();
 /* initialization */
 void haval_start(haval_state*);
 /* updating routine */
-void haval_hash(haval_state*, unsigned char*, size_t);
+void haval_hash(haval_state*, const unsigned char*, size_t);
 /* finalization */
 void haval_end(haval_state*, unsigned char*);
 /* hash a 32-word block */
@@ -242,7 +242,7 @@ static unsigned char padding[128] = {
     }
 
 /* hash a string */
-void haval_string(char* string, unsigned char* fingerprint)
+void haval_string(const char* string, unsigned char* fingerprint)
 {
     haval_state state;
     size_t len = strlen(string);
@@ -253,7 +253,7 @@ void haval_string(char* string, unsigned char* fingerprint)
 }
 
 /* hash a file */
-int haval_file(char* file_name, unsigned char* fingerprint)
+int haval_file(const char* file_name, unsigned char* fingerprint)
 {
     FILE* file;
     haval_state state;
@@ -281,7 +281,7 @@ int haval_file(char* file_name, unsigned char* fingerprint)
 }
 
 /* hash input from stdin */
-void haval_stdin(void)
+void haval_stdin()
 {
     haval_state state;
     size_t i, len;
@@ -323,7 +323,7 @@ void haval_start(haval_state* state)
  * hash a string of specified length.
  * to be used in conjunction with haval_start and haval_end.
  */
-void haval_hash(haval_state* state, unsigned char* str, size_t str_len)
+void haval_hash(haval_state* state, const unsigned char* str, size_t str_len)
 {
     size_t i, rmd_len, fill_len;
 

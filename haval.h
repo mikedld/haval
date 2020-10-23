@@ -82,15 +82,15 @@ typedef struct {
 } haval_state;
 
 /* hash a string */
-void haval_string(char*, unsigned char*);
+void haval_string(const char*, unsigned char*);
 /* hash a file */
-int haval_file(char*, unsigned char*);
+int haval_file(const char*, unsigned char*);
 /* filter -- hash input from stdin */
-void haval_stdin(void);
+void haval_stdin();
 /* initialization */
 void haval_start(haval_state*);
 /* updating routine */
-void haval_hash(haval_state*, unsigned char*, size_t);
+void haval_hash(haval_state*, const unsigned char*, size_t);
 /* finalization */
 void haval_end(haval_state*, unsigned char*);
 /* hash a 32-word block */

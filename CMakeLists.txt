@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-project(haval VERSION 1.1 LANGUAGES C)
+project(haval VERSION 1.1 LANGUAGES CXX)
 
 set(HAVAL_STANDALONE_BUILD OFF)
 if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -23,19 +23,19 @@ if(HAVAL_ENABLE_INSTALL)
 endif()
 
 if(HAVAL_STANDALONE_BUILD)
-    if(NOT CMAKE_C_STANDARD)
-        set(CMAKE_C_STANDARD 90)
-        set(CMAKE_C_STANDARD_REQUIRED ON)
-        set(CMAKE_C_EXTENSIONS OFF)
+    if(NOT CMAKE_CXX_STANDARD)
+        set(CMAKE_CXX_STANDARD 98)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        set(CMAKE_CXX_EXTENSIONS OFF)
     endif()
 
-    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(
             -Wall
             -Wextra
             -pedantic
             $<$<BOOL:${HAVAL_ENABLE_WERROR}>:-Werror>)
-    elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(
             /W4
             $<$<BOOL:${HAVAL_ENABLE_WERROR}>:/WX>)
@@ -50,10 +50,10 @@ add_compile_definitions(
     NUMBER_OF_BLOCKS=${HAVAL_NUMBER_OF_BLOCKS}
     BLOCK_SIZE=${HAVAL_BLOCK_SIZE}
     $<$<NOT:$<BOOL:${HAVAL_BIG_ENDIAN}>>:LITTLE_ENDIAN>
-    $<$<C_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
+    $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 
 add_library(haval
-    haval.c
+    haval.cpp
     haval.h)
 
 if(NOT HAVAL_STANDALONE_BUILD)
@@ -84,7 +84,7 @@ if(HAVAL_ENABLE_TESTS)
     enable_testing()
 
     add_executable(havaltest
-        havaltest.c)
+        havaltest.cpp)
 
     target_link_libraries(havaltest
         PRIVATE
@@ -98,7 +98,7 @@ endif()
 
 if(HAVAL_BUILD_PROGRAMS)
     add_executable(havalapp
-        havalapp.c
+        havalapp.cpp
         havalapp.h)
 
     if(NOT HAVAL_STANDALONE_BUILD)
