@@ -34,40 +34,65 @@
 
 #include "haval.hpp"
 
-#include <cstdio>
-#include <cstring>
+#include <cstdint>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 
-static int exit_code = 0;
+namespace
+{
 
-static void verify_result(const char* data, const std::string& got_str, const char* expected, int is_file)
+int exit_code = 0;
+
+void verify_result(const char* data, const std::string& got_str, const char* expected, int is_file)
 {
     static const char* const hex = "0123456789ABCDEF";
 
     bool result = true;
-    const unsigned char* got = reinterpret_cast<const unsigned char*>(got_str.data());
+    const std::uint8_t* got = reinterpret_cast<const std::uint8_t*>(got_str.data());
 
-    std::printf("HAVAL(%s%s%s) = ", is_file ? "File " : "\"", data, is_file ? "" : "\"");
+    std::cout << "HAVAL(";
+    if (is_file) {
+        std::cout << data;
+    } else {
+        std::cout << std::quoted(data);
+    }
+    std::cout << ") = ";
 
     for (std::size_t i = 0; i < got_str.size(); ++i) {
         const char c1 = hex[got[i] >> 4];
         const char c2 = hex[got[i] & 0x0F];
 
-        std::printf("%c%c", c1, c2);
+        std::cout << c1 << c2;
 
-        if (c1 != expected[i * 2] || c2 != expected[i * 2 + 1]) {
-            result = false;
-        }
+        result = result && c1 == expected[i * 2] && c2 == expected[i * 2 + 1];
     }
 
     result = result && got_str.size() != std::strlen(expected);
 
     if (!result) {
-        std::printf(" != %s", expected);
+        std::cout << " != " << expected;
         exit_code = 1;
     }
 
-    std::printf("\n");
+    std::cout << std::endl;
+}
+
+template<typename hash>
+void test_string(const char* data, const char* result)
+{
+    verify_result(data, hash::from_string(data), result, 0);
+}
+
+template<typename hash>
+void test_file(const char* filename, const char* result)
+{
+    std::ifstream f(filename, std::ios::in | std::ios::binary);
+    if (!f.good()) {
+        std::cout << filename << " cannot be opened! Skipping test..." << std::endl;
+    } else {
+        verify_result(filename, hash::from_stream(f), result, 1);
+    }
 }
 
 // hash a set of certification data and print the results.
@@ -83,42 +108,25 @@ void test(
 {
     using hash = haval::haval<pass_cnt, fpt_len>;
 
-    const char* str;
+    std::cout << "HAVAL certification data (PASS=" << pass_cnt << ", FPTLEN=" << fpt_len << "):" << std::endl;
 
-    std::printf("HAVAL certification data (PASS=%u, FPTLEN=%u):\n", pass_cnt, fpt_len);
+    test_string<hash>("", result1);
+    test_string<hash>("a", result2);
+    test_string<hash>("HAVAL", result3);
+    test_string<hash>("0123456789", result4);
+    test_string<hash>("abcdefghijklmnopqrstuvwxyz", result5);
+    test_string<hash>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", result6);
 
-    str = "";
-    verify_result(str, hash::from_string(str), result1, 0);
+    test_file<hash>("pi.frac", result7);
 
-    str = "a";
-    verify_result(str, hash::from_string(str), result2, 0);
-
-    str = "HAVAL";
-    verify_result(str, hash::from_string(str), result3, 0);
-
-    str = "0123456789";
-    verify_result(str, hash::from_string(str), result4, 0);
-
-    str = "abcdefghijklmnopqrstuvwxyz";
-    verify_result(str, hash::from_string(str), result5, 0);
-
-    str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    verify_result(str, hash::from_string(str), result6, 0);
-
-    str = "pi.frac";
-    std::ifstream f("pi.frac", std::ios::in | std::ios::binary);
-    if (!f.good()) {
-        std::printf("%s cannot be opened! Skipping test...\n", str);
-    } else {
-        verify_result(str, hash::from_stream(f), result7, 1);
-    }
-
-    std::printf("\n");
+    std::cout << std::endl;
 }
+
+} // namespace
 
 int main()
 {
-    std::printf("\n");
+    std::cout << std::endl;
 
     test<3, 128>(
             "C68F39913F901F3DDF44C707357A7D70",

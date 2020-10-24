@@ -66,8 +66,9 @@
 
 #pragma once
 
-#include <string>
+#include <cstdint>
 #include <iosfwd>
+#include <string>
 
 namespace haval
 {
@@ -76,7 +77,7 @@ namespace detail
 {
 
 // a HAVAL word = 32 bits
-using word_t = unsigned int;
+using word_t = std::uint32_t;
 
 // current version number
 constexpr word_t version = 1;
@@ -89,7 +90,7 @@ struct haval_context {
     // buffer for a 32-word block
     word_t block[32];
     // unhashed chars (No.<128)
-    unsigned char remainder[32 * 4];
+    std::uint8_t remainder[32 * 4];
 };
 
 } // namespace detail

@@ -72,9 +72,13 @@
 
 #include "haval.h"
 
+#include <cassert>
+#include <cinttypes>
 #include <cstring>
-#include <type_traits>
 #include <iostream>
+#include <type_traits>
+
+#define WORD_C UINT32_C
 
 namespace haval
 {
@@ -83,7 +87,7 @@ namespace detail
 {
 
 // constants for padding
-const unsigned char padding[128] = { //
+constexpr std::uint8_t padding[128] = { //
         0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
@@ -92,12 +96,6 @@ const unsigned char padding[128] = { //
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
         0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-template<typename T>
-word_t to_word(T x)
-{
-    return static_cast<word_t>(x);
-}
 
 word_t f_1(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0)
 {
@@ -153,7 +151,7 @@ word_t f_5(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, wor
 //
 
 template<unsigned int pass_cnt>
-word_t Fphi_1(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0);
+word_t Fphi_1(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0) = delete;
 
 template<>
 word_t Fphi_1<3>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0)
@@ -174,7 +172,7 @@ word_t Fphi_1<5>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x
 }
 
 template<unsigned int pass_cnt>
-word_t Fphi_2(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0);
+word_t Fphi_2(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0) = delete;
 
 template<>
 word_t Fphi_2<3>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0)
@@ -195,7 +193,7 @@ word_t Fphi_2<5>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x
 }
 
 template<unsigned int pass_cnt>
-word_t Fphi_3(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0);
+word_t Fphi_3(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0) = delete;
 
 template<>
 word_t Fphi_3<3>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0)
@@ -216,7 +214,7 @@ word_t Fphi_3<5>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x
 }
 
 template<unsigned int pass_cnt>
-word_t Fphi_4(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0);
+word_t Fphi_4(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0) = delete;
 
 template<>
 word_t Fphi_4<4>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0)
@@ -231,7 +229,7 @@ word_t Fphi_4<5>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x
 }
 
 template<unsigned int pass_cnt>
-word_t Fphi_5(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0);
+word_t Fphi_5(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0) = delete;
 
 template<>
 word_t Fphi_5<5>(word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, word_t x1, word_t x0)
@@ -276,26 +274,28 @@ void FF_5(word_t& x7, word_t x6, word_t x5, word_t x4, word_t x3, word_t x2, wor
 
 // translate every four characters into a word.
 // assume the number of characters is a multiple of four.
-void ch2uint(unsigned char* string, word_t* word, std::size_t slen)
+void ch2uint(const std::uint8_t* string, word_t* word, std::size_t slen)
 {
-    unsigned char* sp = string;
+    const std::uint8_t* sp = string;
     word_t* wp = word;
     while (sp < string + slen) {
-        *wp++ = to_word(*sp) | (to_word(*(sp + 1)) << 8) | (to_word(*(sp + 2)) << 16) | (to_word(*(sp + 3)) << 24);
+        *wp = word_t{sp[0]} | (word_t{sp[1]} << 8) | (word_t{sp[2]} << 16) | (word_t{sp[3]} << 24);
+        wp++;
         sp += 4;
     }
 }
 
 // translate each word into four characters
-void uint2ch(word_t* word, unsigned char* string, std::size_t wlen)
+void uint2ch(const word_t* word, std::uint8_t* string, std::size_t wlen)
 {
-    word_t* wp = word;
-    unsigned char* sp = string;
+    const word_t* wp = word;
+    std::uint8_t* sp = string;
     while (wp < word + wlen) {
-        *(sp++) = static_cast<unsigned char>(*wp & 0xFF);
-        *(sp++) = static_cast<unsigned char>((*wp >> 8) & 0xFF);
-        *(sp++) = static_cast<unsigned char>((*wp >> 16) & 0xFF);
-        *(sp++) = static_cast<unsigned char>((*wp >> 24) & 0xFF);
+        sp[0] = static_cast<std::uint8_t>(*wp & 0xFF);
+        sp[1] = static_cast<std::uint8_t>((*wp >> 8) & 0xFF);
+        sp[2] = static_cast<std::uint8_t>((*wp >> 16) & 0xFF);
+        sp[3] = static_cast<std::uint8_t>((*wp >> 24) & 0xFF);
+        sp += 4;
         wp++;
     }
 }
@@ -313,41 +313,41 @@ void hash_block(
         const word_t* w,
         typename std::enable_if<curr_pass == 1, int>::type = 0)
 {
-    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w));
-    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 1));
-    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 2));
-    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 3));
-    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 4));
-    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 5));
-    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 6));
-    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 7));
+    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[0]);
+    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[1]);
+    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[2]);
+    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[3]);
+    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[4]);
+    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[5]);
+    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[6]);
+    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[7]);
 
-    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 8));
-    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 9));
-    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 10));
-    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 11));
-    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 12));
-    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 13));
-    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 14));
-    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 15));
+    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[8]);
+    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[9]);
+    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[10]);
+    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[11]);
+    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[12]);
+    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[13]);
+    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[14]);
+    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[15]);
 
-    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 16));
-    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 17));
-    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 18));
-    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 19));
-    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 20));
-    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 21));
-    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 22));
-    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 23));
+    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[16]);
+    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[17]);
+    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[18]);
+    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[19]);
+    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[20]);
+    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[21]);
+    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[22]);
+    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[23]);
 
-    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 24));
-    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 25));
-    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 26));
-    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 27));
-    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 28));
-    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 29));
-    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 30));
-    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 31));
+    FF_1<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[24]);
+    FF_1<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[25]);
+    FF_1<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[26]);
+    FF_1<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[27]);
+    FF_1<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[28]);
+    FF_1<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[29]);
+    FF_1<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[30]);
+    FF_1<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[31]);
 }
 
 template<unsigned int pass_cnt, unsigned int curr_pass = pass_cnt>
@@ -365,42 +365,43 @@ void hash_block(
 {
     hash_block<pass_cnt, curr_pass - 1>(t0, t1, t2, t3, t4, t5, t6, t7, w);
 
-    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 5), 0x452821E6L);
-    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 14), 0x38D01377L);
-    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 26), 0xBE5466CFL);
-    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 18), 0x34E90C6CL);
-    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 11), 0xC0AC29B7L);
-    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 28), 0xC97C50DDL);
-    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 7), 0x3F84D5B5L);
-    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 16), 0xB5470917L);
+    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[5], WORD_C(0x452821E6));
+    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[14], WORD_C(0x38D01377));
+    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[26], WORD_C(0xBE5466CF));
+    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[18], WORD_C(0x34E90C6C));
+    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[11], WORD_C(0xC0AC29B7));
+    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[28], WORD_C(0xC97C50DD));
+    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[7], WORD_C(0x3F84D5B5));
+    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[16], WORD_C(0xB5470917));
 
-    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w), 0x9216D5D9L);
-    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 23), 0x8979FB1BL);
-    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 20), 0xD1310BA6L);
-    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 22), 0x98DFB5ACL);
-    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 1), 0x2FFD72DBL);
-    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 10), 0xD01ADFB7L);
-    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 4), 0xB8E1AFEDL);
-    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 8), 0x6A267E96L);
+    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[0], WORD_C(0x9216D5D9));
+    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[23], WORD_C(0x8979FB1B));
+    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[20], WORD_C(0xD1310BA6));
+    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[22], WORD_C(0x98DFB5AC));
+    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[1], WORD_C(0x2FFD72DB));
+    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[10], WORD_C(0xD01ADFB7));
+    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[4], WORD_C(0xB8E1AFED));
+    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[8], WORD_C(0x6A267E96));
 
-    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 30), 0xBA7C9045L);
-    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 3), 0xF12C7F99L);
-    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 21), 0x24A19947L);
-    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 9), 0xB3916CF7L);
-    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 17), 0x0801F2E2L);
-    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 24), 0x858EFC16L);
-    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 29), 0x636920D8L);
-    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 6), 0x71574E69L);
+    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[30], WORD_C(0xBA7C9045));
+    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[3], WORD_C(0xF12C7F99));
+    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[21], WORD_C(0x24A19947));
+    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[9], WORD_C(0xB3916CF7));
+    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[17], WORD_C(0x0801F2E2));
+    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[24], WORD_C(0x858EFC16));
+    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[29], WORD_C(0x636920D8));
+    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[6], WORD_C(0x71574E69));
 
-    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 19), 0xA458FEA3L);
-    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 12), 0xF4933D7EL);
-    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 15), 0x0D95748FL);
-    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 13), 0x728EB658L);
-    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 2), 0x718BCD58L);
-    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 25), 0x82154AEEL);
-    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 31), 0x7B54A41DL);
-    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 27), 0xC25A59B5L);
+    FF_2<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[19], WORD_C(0xA458FEA3));
+    FF_2<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[12], WORD_C(0xF4933D7E));
+    FF_2<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[15], WORD_C(0x0D95748F));
+    FF_2<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[13], WORD_C(0x728EB658));
+    FF_2<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[2], WORD_C(0x718BCD58));
+    FF_2<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[25], WORD_C(0x82154AEE));
+    FF_2<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[31], WORD_C(0x7B54A41D));
+    FF_2<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[27], WORD_C(0xC25A59B5));
 }
+
 template<unsigned int pass_cnt, unsigned int curr_pass = pass_cnt>
 void hash_block(
         word_t& t0,
@@ -416,41 +417,41 @@ void hash_block(
 {
     hash_block<pass_cnt, curr_pass - 1>(t0, t1, t2, t3, t4, t5, t6, t7, w);
 
-    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 19), 0x9C30D539L);
-    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 9), 0x2AF26013L);
-    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 4), 0xC5D1B023L);
-    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 20), 0x286085F0L);
-    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 28), 0xCA417918L);
-    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 17), 0xB8DB38EFL);
-    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 8), 0x8E79DCB0L);
-    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 22), 0x603A180EL);
+    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[19], WORD_C(0x9C30D539));
+    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[9], WORD_C(0x2AF26013));
+    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[4], WORD_C(0xC5D1B023));
+    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[20], WORD_C(0x286085F0));
+    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[28], WORD_C(0xCA417918));
+    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[17], WORD_C(0xB8DB38EF));
+    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[8], WORD_C(0x8E79DCB0));
+    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[22], WORD_C(0x603A180E));
 
-    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 29), 0x6C9E0E8BL);
-    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 14), 0xB01E8A3EL);
-    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 25), 0xD71577C1L);
-    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 12), 0xBD314B27L);
-    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 24), 0x78AF2FDAL);
-    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 30), 0x55605C60L);
-    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 16), 0xE65525F3L);
-    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 26), 0xAA55AB94L);
+    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[29], WORD_C(0x6C9E0E8B));
+    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[14], WORD_C(0xB01E8A3E));
+    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[25], WORD_C(0xD71577C1));
+    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[12], WORD_C(0xBD314B27));
+    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[24], WORD_C(0x78AF2FDA));
+    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[30], WORD_C(0x55605C60));
+    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[16], WORD_C(0xE65525F3));
+    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[26], WORD_C(0xAA55AB94));
 
-    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 31), 0x57489862L);
-    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 15), 0x63E81440L);
-    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 7), 0x55CA396AL);
-    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 3), 0x2AAB10B6L);
-    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 1), 0xB4CC5C34L);
-    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w), 0x1141E8CEL);
-    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 18), 0xA15486AFL);
-    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 27), 0x7C72E993L);
+    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[31], WORD_C(0x57489862));
+    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[15], WORD_C(0x63E81440));
+    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[7], WORD_C(0x55CA396A));
+    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[3], WORD_C(0x2AAB10B6));
+    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[1], WORD_C(0xB4CC5C34));
+    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[0], WORD_C(0x1141E8CE));
+    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[18], WORD_C(0xA15486AF));
+    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[27], WORD_C(0x7C72E993));
 
-    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 13), 0xB3EE1411L);
-    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 6), 0x636FBC2AL);
-    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 21), 0x2BA9C55DL);
-    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 10), 0x741831F6L);
-    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 23), 0xCE5C3E16L);
-    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 11), 0x9B87931EL);
-    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 5), 0xAFD6BA33L);
-    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 2), 0x6C24CF5CL);
+    FF_3<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[13], WORD_C(0xB3EE1411));
+    FF_3<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[6], WORD_C(0x636FBC2A));
+    FF_3<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[21], WORD_C(0x2BA9C55D));
+    FF_3<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[10], WORD_C(0x741831F6));
+    FF_3<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[23], WORD_C(0xCE5C3E16));
+    FF_3<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[11], WORD_C(0x9B87931E));
+    FF_3<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[5], WORD_C(0xAFD6BA33));
+    FF_3<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[2], WORD_C(0x6C24CF5C));
 }
 
 template<unsigned int pass_cnt, unsigned int curr_pass = pass_cnt>
@@ -468,41 +469,41 @@ void hash_block(
 {
     hash_block<pass_cnt, curr_pass - 1>(t0, t1, t2, t3, t4, t5, t6, t7, w);
 
-    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 24), 0x7A325381L);
-    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 4), 0x28958677L);
-    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w), 0x3B8F4898L);
-    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 14), 0x6B4BB9AFL);
-    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 2), 0xC4BFE81BL);
-    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 7), 0x66282193L);
-    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 28), 0x61D809CCL);
-    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 23), 0xFB21A991L);
+    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[24], WORD_C(0x7A325381));
+    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[4], WORD_C(0x28958677));
+    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[0], WORD_C(0x3B8F4898));
+    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[14], WORD_C(0x6B4BB9AF));
+    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[2], WORD_C(0xC4BFE81B));
+    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[7], WORD_C(0x66282193));
+    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[28], WORD_C(0x61D809CC));
+    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[23], WORD_C(0xFB21A991));
 
-    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 26), 0x487CAC60L);
-    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 6), 0x5DEC8032L);
-    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 30), 0xEF845D5DL);
-    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 20), 0xE98575B1L);
-    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 18), 0xDC262302L);
-    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 25), 0xEB651B88L);
-    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 19), 0x23893E81L);
-    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 3), 0xD396ACC5L);
+    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[26], WORD_C(0x487CAC60));
+    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[6], WORD_C(0x5DEC8032));
+    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[30], WORD_C(0xEF845D5D));
+    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[20], WORD_C(0xE98575B1));
+    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[18], WORD_C(0xDC262302));
+    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[25], WORD_C(0xEB651B88));
+    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[19], WORD_C(0x23893E81));
+    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[3], WORD_C(0xD396ACC5));
 
-    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 22), 0x0F6D6FF3L);
-    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 11), 0x83F44239L);
-    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 31), 0x2E0B4482L);
-    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 21), 0xA4842004L);
-    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 8), 0x69C8F04AL);
-    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 27), 0x9E1F9B5EL);
-    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 12), 0x21C66842L);
-    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 9), 0xF6E96C9AL);
+    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[22], WORD_C(0x0F6D6FF3));
+    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[11], WORD_C(0x83F44239));
+    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[31], WORD_C(0x2E0B4482));
+    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[21], WORD_C(0xA4842004));
+    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[8], WORD_C(0x69C8F04A));
+    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[27], WORD_C(0x9E1F9B5E));
+    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[12], WORD_C(0x21C66842));
+    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[9], WORD_C(0xF6E96C9A));
 
-    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 1), 0x670C9C61L);
-    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 29), 0xABD388F0L);
-    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 5), 0x6A51A0D2L);
-    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 15), 0xD8542F68L);
-    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 17), 0x960FA728L);
-    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 10), 0xAB5133A3L);
-    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 16), 0x6EEF0B6CL);
-    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 13), 0x137A3BE4L);
+    FF_4<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[1], WORD_C(0x670C9C61));
+    FF_4<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[29], WORD_C(0xABD388F0));
+    FF_4<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[5], WORD_C(0x6A51A0D2));
+    FF_4<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[15], WORD_C(0xD8542F68));
+    FF_4<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[17], WORD_C(0x960FA728));
+    FF_4<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[10], WORD_C(0xAB5133A3));
+    FF_4<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[16], WORD_C(0x6EEF0B6C));
+    FF_4<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[13], WORD_C(0x137A3BE4));
 }
 
 template<unsigned int pass_cnt, unsigned int curr_pass = pass_cnt>
@@ -520,56 +521,66 @@ void hash_block(
 {
     hash_block<pass_cnt, curr_pass - 1>(t0, t1, t2, t3, t4, t5, t6, t7, w);
 
-    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 27), 0xBA3BF050L);
-    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 3), 0x7EFB2A98L);
-    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 21), 0xA1F1651DL);
-    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 26), 0x39AF0176L);
-    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 17), 0x66CA593EL);
-    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 11), 0x82430E88L);
-    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 20), 0x8CEE8619L);
-    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 29), 0x456F9FB4L);
+    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[27], WORD_C(0xBA3BF050));
+    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[3], WORD_C(0x7EFB2A98));
+    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[21], WORD_C(0xA1F1651D));
+    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[26], WORD_C(0x39AF0176));
+    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[17], WORD_C(0x66CA593E));
+    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[11], WORD_C(0x82430E88));
+    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[20], WORD_C(0x8CEE8619));
+    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[29], WORD_C(0x456F9FB4));
 
-    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 19), 0x7D84A5C3L);
-    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w), 0x3B8B5EBEL);
-    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 12), 0xE06F75D8L);
-    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 7), 0x85C12073L);
-    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 13), 0x401A449FL);
-    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 8), 0x56C16AA6L);
-    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 31), 0x4ED3AA62L);
-    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 10), 0x363F7706L);
+    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[19], WORD_C(0x7D84A5C3));
+    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[0], WORD_C(0x3B8B5EBE));
+    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[12], WORD_C(0xE06F75D8));
+    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[7], WORD_C(0x85C12073));
+    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[13], WORD_C(0x401A449F));
+    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[8], WORD_C(0x56C16AA6));
+    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[31], WORD_C(0x4ED3AA62));
+    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[10], WORD_C(0x363F7706));
 
-    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 5), 0x1BFEDF72L);
-    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 9), 0x429B023DL);
-    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 14), 0x37D0D724L);
-    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 30), 0xD00A1248L);
-    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 18), 0xDB0FEAD3L);
-    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 6), 0x49F1C09BL);
-    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 28), 0x075372C9L);
-    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 24), 0x80991B7BL);
+    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[5], WORD_C(0x1BFEDF72));
+    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[9], WORD_C(0x429B023D));
+    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[14], WORD_C(0x37D0D724));
+    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[30], WORD_C(0xD00A1248));
+    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[18], WORD_C(0xDB0FEAD3));
+    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[6], WORD_C(0x49F1C09B));
+    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[28], WORD_C(0x075372C9));
+    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[24], WORD_C(0x80991B7B));
 
-    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, *(w + 2), 0x25D479D8L);
-    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, *(w + 23), 0xF6E8DEF7L);
-    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, *(w + 16), 0xE3FE501AL);
-    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, *(w + 22), 0xB6794C3BL);
-    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, *(w + 4), 0x976CE0BDL);
-    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, *(w + 1), 0x04C006BAL);
-    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, *(w + 25), 0xC1A94FB6L);
-    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, *(w + 15), 0x409F60C4L);
+    FF_5<pass_cnt>(t7, t6, t5, t4, t3, t2, t1, t0, w[2], WORD_C(0x25D479D8));
+    FF_5<pass_cnt>(t6, t5, t4, t3, t2, t1, t0, t7, w[23], WORD_C(0xF6E8DEF7));
+    FF_5<pass_cnt>(t5, t4, t3, t2, t1, t0, t7, t6, w[16], WORD_C(0xE3FE501A));
+    FF_5<pass_cnt>(t4, t3, t2, t1, t0, t7, t6, t5, w[22], WORD_C(0xB6794C3B));
+    FF_5<pass_cnt>(t3, t2, t1, t0, t7, t6, t5, t4, w[4], WORD_C(0x976CE0BD));
+    FF_5<pass_cnt>(t2, t1, t0, t7, t6, t5, t4, t3, w[1], WORD_C(0x04C006BA));
+    FF_5<pass_cnt>(t1, t0, t7, t6, t5, t4, t3, t2, w[25], WORD_C(0xC1A94FB6));
+    FF_5<pass_cnt>(t0, t7, t6, t5, t4, t3, t2, t1, w[15], WORD_C(0x409F60C4));
 }
 
 // tailor the last output
 template<unsigned int fpt_len>
-void tailor(haval_context& context);
+void tailor(haval_context& context) = delete;
 
 template<>
 void tailor<128>(haval_context& context)
 {
     auto& f = context.fingerprint;
 
-    f[0] += rotate_right((f[7] & 0x000000FFL) | (f[6] & 0xFF000000L) | (f[5] & 0x00FF0000L) | (f[4] & 0x0000FF00L), 8);
-    f[1] += rotate_right((f[7] & 0x0000FF00L) | (f[6] & 0x000000FFL) | (f[5] & 0xFF000000L) | (f[4] & 0x00FF0000L), 16);
-    f[2] += rotate_right((f[7] & 0x00FF0000L) | (f[6] & 0x0000FF00L) | (f[5] & 0x000000FFL) | (f[4] & 0xFF000000L), 24);
-    f[3] += (f[7] & 0xFF000000L) | (f[6] & 0x00FF0000L) | (f[5] & 0x0000FF00L) | (f[4] & 0x000000FFL);
+    f[0] += rotate_right(
+            (f[7] & WORD_C(0x000000FF)) | (f[6] & WORD_C(0xFF000000)) | (f[5] & WORD_C(0x00FF0000)) |
+                    (f[4] & WORD_C(0x0000FF00)),
+            8);
+    f[1] += rotate_right(
+            (f[7] & WORD_C(0x0000FF00)) | (f[6] & WORD_C(0x000000FF)) | (f[5] & WORD_C(0xFF000000)) |
+                    (f[4] & WORD_C(0x00FF0000)),
+            16);
+    f[2] += rotate_right(
+            (f[7] & WORD_C(0x00FF0000)) | (f[6] & WORD_C(0x0000FF00)) | (f[5] & WORD_C(0x000000FF)) |
+                    (f[4] & WORD_C(0xFF000000)),
+            24);
+    f[3] += (f[7] & WORD_C(0xFF000000)) | (f[6] & WORD_C(0x00FF0000)) | (f[5] & WORD_C(0x0000FF00)) |
+            (f[4] & WORD_C(0x000000FF));
 }
 
 template<>
@@ -577,11 +588,11 @@ void tailor<160>(haval_context& context)
 {
     auto& f = context.fingerprint;
 
-    f[0] += rotate_right((f[7] & to_word(0x3F)) | (f[6] & (to_word(0x7F) << 25)) | (f[5] & (to_word(0x3F) << 19)), 19);
-    f[1] += rotate_right((f[7] & (to_word(0x3F) << 6)) | (f[6] & to_word(0x3F)) | (f[5] & (to_word(0x7F) << 25)), 25);
-    f[2] += (f[7] & (to_word(0x7F) << 12)) | (f[6] & (to_word(0x3F) << 6)) | (f[5] & to_word(0x3F));
-    f[3] += ((f[7] & (to_word(0x3F) << 19)) | (f[6] & (to_word(0x7F) << 12)) | (f[5] & (to_word(0x3F) << 6))) >> 6;
-    f[4] += ((f[7] & (to_word(0x7F) << 25)) | (f[6] & (to_word(0x3F) << 19)) | (f[5] & (to_word(0x7F) << 12))) >> 12;
+    f[0] += rotate_right((f[7] & WORD_C(0x3F)) | (f[6] & (WORD_C(0x7F) << 25)) | (f[5] & (WORD_C(0x3F) << 19)), 19);
+    f[1] += rotate_right((f[7] & (WORD_C(0x3F) << 6)) | (f[6] & WORD_C(0x3F)) | (f[5] & (WORD_C(0x7F) << 25)), 25);
+    f[2] += (f[7] & (WORD_C(0x7F) << 12)) | (f[6] & (WORD_C(0x3F) << 6)) | (f[5] & WORD_C(0x3F));
+    f[3] += ((f[7] & (WORD_C(0x3F) << 19)) | (f[6] & (WORD_C(0x7F) << 12)) | (f[5] & (WORD_C(0x3F) << 6))) >> 6;
+    f[4] += ((f[7] & (WORD_C(0x7F) << 25)) | (f[6] & (WORD_C(0x3F) << 19)) | (f[5] & (WORD_C(0x7F) << 12))) >> 12;
 }
 
 template<>
@@ -589,12 +600,12 @@ void tailor<192>(haval_context& context)
 {
     auto& f = context.fingerprint;
 
-    f[0] += rotate_right((f[7] & to_word(0x1F)) | (f[6] & (to_word(0x3F) << 26)), 26);
-    f[1] += (f[7] & (to_word(0x1F) << 5)) | (f[6] & to_word(0x1F));
-    f[2] += ((f[7] & (to_word(0x3F) << 10)) | (f[6] & (to_word(0x1F) << 5))) >> 5;
-    f[3] += ((f[7] & (to_word(0x1F) << 16)) | (f[6] & (to_word(0x3F) << 10))) >> 10;
-    f[4] += ((f[7] & (to_word(0x1F) << 21)) | (f[6] & (to_word(0x1F) << 16))) >> 16;
-    f[5] += ((f[7] & (to_word(0x3F) << 26)) | (f[6] & (to_word(0x1F) << 21))) >> 21;
+    f[0] += rotate_right((f[7] & WORD_C(0x1F)) | (f[6] & (WORD_C(0x3F) << 26)), 26);
+    f[1] += (f[7] & (WORD_C(0x1F) << 5)) | (f[6] & WORD_C(0x1F));
+    f[2] += ((f[7] & (WORD_C(0x3F) << 10)) | (f[6] & (WORD_C(0x1F) << 5))) >> 5;
+    f[3] += ((f[7] & (WORD_C(0x1F) << 16)) | (f[6] & (WORD_C(0x3F) << 10))) >> 10;
+    f[4] += ((f[7] & (WORD_C(0x1F) << 21)) | (f[6] & (WORD_C(0x1F) << 16))) >> 16;
+    f[5] += ((f[7] & (WORD_C(0x3F) << 26)) | (f[6] & (WORD_C(0x1F) << 21))) >> 21;
 }
 
 template<>
@@ -626,14 +637,14 @@ void haval<pass_cnt, fpt_len>::start()
     m_context.count[0] = 0;
     m_context.count[1] = 0;
     // initial fingerprint
-    m_context.fingerprint[0] = 0x243F6A88L;
-    m_context.fingerprint[1] = 0x85A308D3L;
-    m_context.fingerprint[2] = 0x13198A2EL;
-    m_context.fingerprint[3] = 0x03707344L;
-    m_context.fingerprint[4] = 0xA4093822L;
-    m_context.fingerprint[5] = 0x299F31D0L;
-    m_context.fingerprint[6] = 0x082EFA98L;
-    m_context.fingerprint[7] = 0xEC4E6C89L;
+    m_context.fingerprint[0] = WORD_C(0x243F6A88);
+    m_context.fingerprint[1] = WORD_C(0x85A308D3);
+    m_context.fingerprint[2] = WORD_C(0x13198A2E);
+    m_context.fingerprint[3] = WORD_C(0x03707344);
+    m_context.fingerprint[4] = WORD_C(0xA4093822);
+    m_context.fingerprint[5] = WORD_C(0x299F31D0);
+    m_context.fingerprint[6] = WORD_C(0x082EFA98);
+    m_context.fingerprint[7] = WORD_C(0xEC4E6C89);
 }
 
 // hash a string of specified length.
@@ -641,35 +652,36 @@ void haval<pass_cnt, fpt_len>::start()
 template<unsigned int pass_cnt, unsigned int fpt_len>
 void haval<pass_cnt, fpt_len>::update(const void* vdata, std::size_t data_len)
 {
-    std::size_t i, rmd_len, fill_len;
-    const unsigned char* data = static_cast<const unsigned char*>(vdata);
+    assert(data_len <= UINT32_MAX);
+
+    const std::uint8_t* data = static_cast<const std::uint8_t*>(vdata);
 
     // calculate the number of bytes in the remainder
-    rmd_len = (m_context.count[0] >> 3) & 0x7F;
-    fill_len = 128 - rmd_len;
+    std::size_t rmd_len = (m_context.count[0] >> 3) & 0x7F;
+    std::size_t fill_len = 128 - rmd_len;
 
     // update the number of bits
-    m_context.count[0] += detail::to_word(data_len) << 3;
+    m_context.count[0] += static_cast<detail::word_t>(data_len) << 3;
     if (m_context.count[0] < (data_len << 3)) {
         m_context.count[1]++;
     }
-    m_context.count[1] += detail::to_word(data_len) >> 29;
+    m_context.count[1] += static_cast<detail::word_t>(data_len) >> 29;
+
+    std::size_t i = 0;
 
 #ifdef HAVAL_LITTLE_ENDIAN
 
     // hash as many blocks as possible
     if (rmd_len + data_len >= 128) {
-        std::memcpy(reinterpret_cast<unsigned char*>(m_context.block) + rmd_len, data, fill_len);
+        std::memcpy(reinterpret_cast<std::uint8_t*>(m_context.block) + rmd_len, data, fill_len);
         hash_block();
         for (i = fill_len; i + 127 < data_len; i += 128) {
             std::memcpy(m_context.block, data + i, 128);
             hash_block();
         }
         rmd_len = 0;
-    } else {
-        i = 0;
     }
-    std::memcpy(reinterpret_cast<unsigned char*>(m_context.block) + rmd_len, data + i, data_len - i);
+    std::memcpy(reinterpret_cast<std::uint8_t*>(m_context.block) + rmd_len, data + i, data_len - i);
 
 #else
 
@@ -684,8 +696,6 @@ void haval<pass_cnt, fpt_len>::update(const void* vdata, std::size_t data_len)
             hash_block();
         }
         rmd_len = 0;
-    } else {
-        i = 0;
     }
     // save the remaining input chars
     std::memcpy(&m_context.remainder[rmd_len], data + i, data_len - i);
@@ -697,19 +707,16 @@ void haval<pass_cnt, fpt_len>::update(const void* vdata, std::size_t data_len)
 template<unsigned int pass_cnt, unsigned int fpt_len>
 std::string haval<pass_cnt, fpt_len>::end()
 {
-    std::string final_fpt;
-    unsigned char tail[10];
-    std::size_t rmd_len, pad_len;
-
     // save the version number, the number of passes, the fingerprint
     // length and the number of bits in the unpadded message.
-    tail[0] = static_cast<unsigned char>(((fpt_len & 0x3) << 6) | ((pass_cnt & 0x7) << 3) | (detail::version & 0x7));
-    tail[1] = static_cast<unsigned char>((fpt_len >> 2) & 0xFF);
+    std::uint8_t tail[10];
+    tail[0] = static_cast<std::uint8_t>(((fpt_len & 0x3) << 6) | ((pass_cnt & 0x7) << 3) | (detail::version & 0x7));
+    tail[1] = static_cast<std::uint8_t>((fpt_len >> 2) & 0xFF);
     detail::uint2ch(m_context.count, &tail[2], 2);
 
     // pad out to 118 mod 128
-    rmd_len = (m_context.count[0] >> 3) & 0x7f;
-    pad_len = (rmd_len < 118) ? (118 - rmd_len) : (246 - rmd_len);
+    std::size_t rmd_len = (m_context.count[0] >> 3) & 0x7f;
+    std::size_t pad_len = (rmd_len < 118) ? (118 - rmd_len) : (246 - rmd_len);
     update(detail::padding, pad_len);
 
     // append the version number, the number of passes,
@@ -720,8 +727,8 @@ std::string haval<pass_cnt, fpt_len>::end()
     detail::tailor<fpt_len>(m_context);
 
     // translate and save the final fingerprint
-    final_fpt.resize(fpt_len >> 3);
-    detail::uint2ch(m_context.fingerprint, reinterpret_cast<unsigned char*>(&final_fpt[0]), fpt_len >> 5);
+    std::string final_fpt(fpt_len >> 3, '\0');
+    detail::uint2ch(m_context.fingerprint, reinterpret_cast<std::uint8_t*>(&final_fpt[0]), fpt_len >> 5);
 
     // clear the state information
     std::memset(&m_context, 0, sizeof(m_context));
@@ -742,9 +749,8 @@ void haval<pass_cnt, fpt_len>::hash_block()
     auto t5 = m_context.fingerprint[5];
     auto t6 = m_context.fingerprint[6];
     auto t7 = m_context.fingerprint[7];
-    const auto* w = m_context.block;
 
-    detail::hash_block<pass_cnt>(t0, t1, t2, t3, t4, t5, t6, t7, w);
+    detail::hash_block<pass_cnt>(t0, t1, t2, t3, t4, t5, t6, t7, m_context.block);
 
     m_context.fingerprint[0] += t0;
     m_context.fingerprint[1] += t1;
@@ -794,3 +800,5 @@ std::string haval<pass_cnt, fpt_len>::from_stream(std::istream& stream)
 }
 
 } // namespace haval
+
+#undef WORD_C
