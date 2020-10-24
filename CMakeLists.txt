@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-project(haval VERSION 1.1 LANGUAGES CXX)
+project(haval VERSION 1.2 LANGUAGES CXX)
 
 set(HAVAL_STANDALONE_BUILD OFF)
 if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -54,6 +54,7 @@ if(HAVAL_ENABLE_INSTALL)
 
     install(
         FILES
+            ChangeLog
             haval-paper.pdf
             LICENSE
             README.md

@@ -1,3 +1,14 @@
+2020-10-24  Mike Gelfand  <mikedld@mikedld.com>
+
+    * Rewrite the library in C++ and make it header-only, allowing to
+      instantiate the template with different pass count and fingerprint
+      length values within the same program without much fuss.
+    * Move certification data checks code from the app into a unit test.
+    * Allow changing app parameters without recompilation via environment
+      variables: HAVAL_PASS (defaults to 3), HAVAL_FPTLEN (256),
+      HAVAL_NUMBER_OF_BLOCKS (5000), HAVAL_BLOCK_SIZE (5000).
+    * Switch to CMake build system.
+
 2003-01-21  Lawrence Teo  <lteo@calyptix.com>
 
     * Makefile.am (EXTRA_DIST): Distribute haval-paper.pdf and not
