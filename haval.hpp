@@ -1,72 +1,31 @@
-// haval.hpp:  specifies the routines in the HAVAL (V.1) hashing library.
-//
-// Copyright (c) 2003 Calyptix Security Corporation
-// Copyright (c) 2020 Mike Gelfand
+// Copyright (c) 2020, Mike Gelfand
+// Copyright (c) 2003, Calyptix Security Corporation
 // All rights reserved.
 //
-// This code is derived from software contributed to Calyptix Security
-// Corporation by Yuliang Zheng.
-//
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-// 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-// 3. Neither the name of Calyptix Security Corporation nor the
-//    names of its contributors may be used to endorse or promote
-//    products derived from this software without specific prior
-//    written permission.
+// modification, are permitted provided that the following conditions are met:
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
 //
-// -------------------------------------------------------------------
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
 //
-//     HAVAL is a one-way hashing algorithm with the following
-//     collision-resistant property:
-//            It is computationally infeasible to find two or more
-//            messages that are hashed into the same fingerprint.
+// 3. Neither the name of the copyright holder nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
 //
-// Reference:
-//      Y. Zheng, J. Pieprzyk and J. Seberry:
-//      ``HAVAL --- a one-way hashing algorithm with variable
-//      length of output'', Advances in Cryptology --- AUSCRYPT'92,
-//      Lecture Notes in Computer Science,  Vol.718, pp.83-104,
-//      Springer-Verlag, 1993.
-//
-// Descriptions:
-//     -  haval_string:      hash a string
-//     -  haval_file:        hash a file
-//     -  haval_stdin:       filter -- hash input from the stdin device
-//     -  haval_hash:        hash a string of specified length
-//                           (Haval_hash is used in conjunction with
-//                            haval_start & haval_end.)
-//     -  haval_hash_block:  hash a 32-word block
-//     -  haval_start:       initialization
-//     -  haval_end:         finalization
-//
-// Authors:    Yuliang Zheng and Lawrence Teo
-//             Calyptix Security Corporation
-//             P.O. Box 561508, Charlotte, NC 28213, USA
-//             Email: info@calyptix.com
-//             URL:   http://www.calyptix.com/
-//             Voice: +1 704 806 8635
-//
-// For a list of changes, see the ChangeLog file.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 

@@ -59,13 +59,6 @@ target_compile_definitions(haval
 
 if(HAVAL_ENABLE_INSTALL)
     install(
-        TARGETS haval
-        EXPORT ${PROJECT_NAME}-targets
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-    install(
         FILES
             haval.h
             haval.hpp
@@ -113,6 +106,13 @@ if(HAVAL_BUILD_PROGRAMS)
 endif()
 
 if(HAVAL_ENABLE_INSTALL)
+    install(
+        FILES
+            haval-paper.pdf
+            LICENSE
+            README.md
+        DESTINATION ${CMAKE_INSTALL_DOCDIR})
+
     install(
         EXPORT ${PROJECT_NAME}-targets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
