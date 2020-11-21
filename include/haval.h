@@ -71,12 +71,15 @@ class haval
 public:
     using size_type = std::size_t;
 
+    static constexpr size_type result_size = fpt_len >> 3;
+
 public:
     // initialization
     void start();
     // updating routine
     void update(const void* data, size_type data_len);
     // finalization
+    void end_to(void* data);
     std::string end();
 
     // hash a block

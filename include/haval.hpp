@@ -664,8 +664,10 @@ void haval<pass_cnt, fpt_len>::update(const void* vdata, size_type data_len)
 
 // finalization
 template<unsigned int pass_cnt, unsigned int fpt_len>
-std::string haval<pass_cnt, fpt_len>::end()
+void haval<pass_cnt, fpt_len>::end_to(void* data)
 {
+    assert(data != nullptr);
+
     // save the version number, the number of passes, the fingerprint
     // length and the number of bits in the unpadded message.
     std::uint8_t tail[10];
@@ -686,13 +688,19 @@ std::string haval<pass_cnt, fpt_len>::end()
     detail::tailor<fpt_len>(m_context);
 
     // translate and save the final fingerprint
-    std::string final_fpt(fpt_len >> 3, '\0');
-    detail::uint2ch(m_context.fingerprint, reinterpret_cast<std::uint8_t*>(&final_fpt[0]), fpt_len >> 5);
+    detail::uint2ch(m_context.fingerprint, static_cast<std::uint8_t*>(data), fpt_len >> 5);
 
     // clear the state information
     std::memset(&m_context, 0, sizeof(m_context));
+}
 
-    return final_fpt;
+// finalization
+template<unsigned int pass_cnt, unsigned int fpt_len>
+std::string haval<pass_cnt, fpt_len>::end()
+{
+    std::string result(result_size, '\0');
+    end_to(&result[0]);
+    return result;
 }
 
 // hash a 32-word block
