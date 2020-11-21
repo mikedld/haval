@@ -1,3 +1,13 @@
+2020-11-21  Mike Gelfand  <mikedld@mikedld.com>
+
+    * Switch from separate `from_*` methods to an overloaded `hash` method.
+    * Add new `end_to` method to store result in a user-provided buffer.
+    * Expose library version via havalver.h file.
+    * Add an (optional) Qt convenience wrapper with Qt 5 and Qt 6 support.
+    * Support specifying components when using `find_package` with CMake;
+      currently 3 components are provided: "core" (STL-based library),
+      "qt" (Qt-based wrapper), and "app" (CLI tool).
+
 2020-10-24  Mike Gelfand  <mikedld@mikedld.com>
 
     * Rewrite the library in C++ and make it header-only, allowing to
