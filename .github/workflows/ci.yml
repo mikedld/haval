@@ -22,7 +22,7 @@ jobs:
           - cmake: minimal
             cmake_url_part: v3.12/cmake-3.12.4
           - cmake: latest
-            cmake_url_part: v3.18/cmake-3.18.4
+            cmake_url_part: v3.19/cmake-3.19.0
           - os: linux
             runner: ubuntu-latest
           - os: windows
