@@ -83,11 +83,11 @@ public:
     std::string end();
 
     // hash a block
-    static std::string from_data(const void* data, size_type data_len);
+    static std::string hash(const void* data, size_type data_len);
     // hash a string
-    static std::string from_string(const std::string& data);
+    static std::string hash(const std::string& data);
     // hash a stream
-    static std::string from_stream(std::istream& stream);
+    static std::string hash(std::istream& stream);
 
 private:
     void hash_block();

@@ -73,20 +73,20 @@ void verify_result(const char* data, const std::string& got_str, const char* exp
     std::cout << std::endl;
 }
 
-template<typename hash>
+template<typename hasher>
 void test_string(const char* data, const char* result)
 {
-    verify_result(data, hash::from_string(data), result, 0);
+    verify_result(data, hasher::hash(data), result, 0);
 }
 
-template<typename hash>
+template<typename hasher>
 void test_file(const char* filename, const char* result)
 {
     std::ifstream f(filename, std::ios::in | std::ios::binary);
     if (!f.good()) {
         std::cout << filename << " cannot be opened! Skipping test..." << std::endl;
     } else {
-        verify_result(filename, hash::from_stream(f), result, 1);
+        verify_result(filename, hasher::hash(f), result, 1);
     }
 }
 
@@ -101,18 +101,18 @@ void test(
         const char* result6,
         const char* result7)
 {
-    using hash = haval::haval<pass_cnt, fpt_len>;
+    using hasher = haval::haval<pass_cnt, fpt_len>;
 
     std::cout << "HAVAL certification data (PASS=" << pass_cnt << ", FPTLEN=" << fpt_len << "):" << std::endl;
 
-    test_string<hash>("", result1);
-    test_string<hash>("a", result2);
-    test_string<hash>("HAVAL", result3);
-    test_string<hash>("0123456789", result4);
-    test_string<hash>("abcdefghijklmnopqrstuvwxyz", result5);
-    test_string<hash>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", result6);
+    test_string<hasher>("", result1);
+    test_string<hasher>("a", result2);
+    test_string<hasher>("HAVAL", result3);
+    test_string<hasher>("0123456789", result4);
+    test_string<hasher>("abcdefghijklmnopqrstuvwxyz", result5);
+    test_string<hasher>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", result6);
 
-    test_file<hash>("pi.frac", result7);
+    test_file<hasher>("pi.frac", result7);
 
     std::cout << std::endl;
 }

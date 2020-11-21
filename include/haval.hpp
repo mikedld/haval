@@ -731,7 +731,7 @@ void haval<pass_cnt, fpt_len>::hash_block()
 
 // hash a block
 template<unsigned int pass_cnt, unsigned int fpt_len>
-std::string haval<pass_cnt, fpt_len>::from_data(const void* data, size_type data_len)
+std::string haval<pass_cnt, fpt_len>::hash(const void* data, size_type data_len)
 {
     haval<pass_cnt, fpt_len> context;
     context.start();
@@ -741,14 +741,14 @@ std::string haval<pass_cnt, fpt_len>::from_data(const void* data, size_type data
 
 // hash a string
 template<unsigned int pass_cnt, unsigned int fpt_len>
-std::string haval<pass_cnt, fpt_len>::from_string(const std::string& data)
+std::string haval<pass_cnt, fpt_len>::hash(const std::string& data)
 {
-    return from_data(data.data(), data.size());
+    return hash(data.data(), data.size());
 }
 
 // hash a stream
 template<unsigned int pass_cnt, unsigned int fpt_len>
-std::string haval<pass_cnt, fpt_len>::from_stream(std::istream& stream)
+std::string haval<pass_cnt, fpt_len>::hash(std::istream& stream)
 {
     haval<pass_cnt, fpt_len> context;
     context.start();

@@ -131,11 +131,11 @@ void usage(unsigned int pass_cnt, unsigned int fpt_len)
 template<unsigned int pass_cnt, unsigned int fpt_len>
 int main_impl(int argc, char* argv[])
 {
-    using hash = haval::haval<pass_cnt, fpt_len>;
+    using hasher = haval::haval<pass_cnt, fpt_len>;
 
     if (argc <= 1) {
         // filter
-        std::cout << to_hex(hash::from_stream(std::cin)) << std::endl;
+        std::cout << to_hex(hasher::hash(std::cin)) << std::endl;
     }
 
     for (int i = 1; i < argc; i++) {
@@ -147,7 +147,7 @@ int main_impl(int argc, char* argv[])
         } else if (arg.compare(0, 2, "-m") == 0) {
             // hash string
             const std::string data = arg.substr(2);
-            std::cout << "HAVAL(" << std::quoted(data) << ") = " << to_hex(hash::from_string(data)) << std::endl;
+            std::cout << "HAVAL(" << std::quoted(data) << ") = " << to_hex(hasher::hash(data)) << std::endl;
         } else if (arg == "-s") {
             // test speed
             haval_speed<pass_cnt, fpt_len>();
@@ -166,7 +166,7 @@ int main_impl(int argc, char* argv[])
             if (!f.good()) {
                 std::cout << arg << " can not be opened !" << std::endl;
             } else {
-                std::cout << "HAVAL(" << arg << ") = " << to_hex(hash::from_stream(f)) << std::endl;
+                std::cout << "HAVAL(" << arg << ") = " << to_hex(hasher::hash(f)) << std::endl;
             }
         }
     }
