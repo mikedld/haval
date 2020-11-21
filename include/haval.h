@@ -69,15 +69,18 @@ class haval
     static_assert(fpt_len % 32 == 0, "");
 
 public:
+    using size_type = std::size_t;
+
+public:
     // initialization
     void start();
     // updating routine
-    void update(const void* data, std::size_t data_len);
+    void update(const void* data, size_type data_len);
     // finalization
     std::string end();
 
     // hash a block
-    static std::string from_data(const void* data, std::size_t data_len);
+    static std::string from_data(const void* data, size_type data_len);
     // hash a string
     static std::string from_string(const std::string& data);
     // hash a stream

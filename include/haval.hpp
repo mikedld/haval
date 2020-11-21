@@ -609,15 +609,15 @@ void haval<pass_cnt, fpt_len>::start()
 // hash a string of specified length.
 // to be used in conjunction with haval_start and haval_end.
 template<unsigned int pass_cnt, unsigned int fpt_len>
-void haval<pass_cnt, fpt_len>::update(const void* vdata, std::size_t data_len)
+void haval<pass_cnt, fpt_len>::update(const void* vdata, size_type data_len)
 {
     assert(data_len <= UINT32_MAX);
 
     const std::uint8_t* data = static_cast<const std::uint8_t*>(vdata);
 
     // calculate the number of bytes in the remainder
-    std::size_t rmd_len = (m_context.count[0] >> 3) & 0x7F;
-    std::size_t fill_len = 128 - rmd_len;
+    size_type rmd_len = (m_context.count[0] >> 3) & 0x7F;
+    size_type fill_len = 128 - rmd_len;
 
     // update the number of bits
     m_context.count[0] += static_cast<detail::word_t>(data_len) << 3;
@@ -626,7 +626,7 @@ void haval<pass_cnt, fpt_len>::update(const void* vdata, std::size_t data_len)
     }
     m_context.count[1] += static_cast<detail::word_t>(data_len) >> 29;
 
-    std::size_t i = 0;
+    size_type i = 0;
 
 #ifdef HAVAL_LITTLE_ENDIAN
 
@@ -674,8 +674,8 @@ std::string haval<pass_cnt, fpt_len>::end()
     detail::uint2ch(m_context.count, &tail[2], 2);
 
     // pad out to 118 mod 128
-    std::size_t rmd_len = (m_context.count[0] >> 3) & 0x7f;
-    std::size_t pad_len = (rmd_len < 118) ? (118 - rmd_len) : (246 - rmd_len);
+    size_type rmd_len = (m_context.count[0] >> 3) & 0x7f;
+    size_type pad_len = (rmd_len < 118) ? (118 - rmd_len) : (246 - rmd_len);
     update(detail::padding, pad_len);
 
     // append the version number, the number of passes,
@@ -723,7 +723,7 @@ void haval<pass_cnt, fpt_len>::hash_block()
 
 // hash a block
 template<unsigned int pass_cnt, unsigned int fpt_len>
-std::string haval<pass_cnt, fpt_len>::from_data(const void* data, std::size_t data_len)
+std::string haval<pass_cnt, fpt_len>::from_data(const void* data, size_type data_len)
 {
     haval<pass_cnt, fpt_len> context;
     context.start();
@@ -749,7 +749,7 @@ std::string haval<pass_cnt, fpt_len>::from_stream(std::istream& stream)
 
     for (;;) {
         stream.read(buffer, sizeof(buffer));
-        context.update(buffer, static_cast<std::size_t>(stream.gcount()));
+        context.update(buffer, static_cast<size_type>(stream.gcount()));
         if (stream.eof()) {
             break;
         }
