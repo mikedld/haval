@@ -49,4 +49,6 @@ SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 TabWidth: 4
+TypenameMacros:
+- QT_PREPEND_NAMESPACE
 UseTab: Never

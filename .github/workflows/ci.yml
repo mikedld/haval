@@ -29,20 +29,28 @@ jobs:
             runner: windows-latest
           - os: windows
             arch: x86
-            cmake_args: -A Win32
+            cmake_args: -A Win32 -DHAVAL_ENABLE_QT=OFF
           - os: windows
             arch: x64
-            cmake_args: -A x64
+            cmake_args: -A x64 -DHAVAL_ENABLE_QT=OFF
           - os: macos
             runner: macos-latest
+            cmake_args: -DCMAKE_PREFIX_PATH=/usr/local/opt/qt5/lib/cmake
     steps:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Install dependencies (linux)
         if: matrix.os == 'linux'
         run: |
+          set -ex
           wget --no-check-certificate https://cmake.org/files/${{ matrix.cmake_url_part }}-Linux-x86_64.tar.gz -O /tmp/cmake.tar.gz
           sudo tar xf /tmp/cmake.tar.gz -C /usr/local --strip-components 1
+          sudo apt-get install -y --no-install-recommends qtbase5-dev
+      - name: Install dependencies (macos)
+        if: matrix.os == 'macos'
+        run: |
+          set -ex
+          brew install qt5
       - name: CMake version
         run: cmake --version
       - name: Configure

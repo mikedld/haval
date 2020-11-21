@@ -16,6 +16,7 @@ set_target_properties(havalapp
 if(HAVAL_ENABLE_INSTALL)
     install(
         TARGETS havalapp
-        EXPORT ${PROJECT_NAME}-targets
+        EXPORT ${PROJECT_NAME}-targets-app
+        COMPONENT app
         DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
